@@ -24,10 +24,10 @@ class Keypoint(BaseModel):
 
 
 keys = Keypoint()
-model = YOLO('/Users/deniskrylov/Developer/EiLAPython/models/yolo-pose.pt')
+model = YOLO('/Users/deniskrylov/Developer/PosEmotion/models/yolo-pose.pt')
 
-img = cv2.imread('/Users/deniskrylov/Developer/EiLAPython/assets/frames/aJKL0ahn1Dk_19556.jpg')
-results = model('/Users/deniskrylov/Developer/EiLAPython/assets/frames/aJKL0ahn1Dk_19556.jpg')[0]
+img = cv2.imread('/Users/deniskrylov/Developer/PosEmotion/assets/frames/aJKL0ahn1Dk_19532.jpg')
+results = model('/Users/deniskrylov/Developer/PosEmotion/assets/frames/aJKL0ahn1Dk_19532.jpg')[0]
 
 for result in results:
     print(result.keypoints.xy.numpy().tolist()[0])
