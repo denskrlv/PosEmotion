@@ -1,6 +1,12 @@
 # PosEmotion
 
-Introduction
+Logo
+
+Abstract
+
+## Contents
+
+## Introduction
 
 ## Requirements
 For this project EiLA (Latin-American) dataset was used. To run scripts succesfully, all data should have the the following structure:
@@ -25,13 +31,12 @@ For this project EiLA (Latin-American) dataset was used. To run scripts succesfu
 │......
 ```
 
-## Models
+## Pre-trained Models
 These pre-trained models were used:
-| Model      | Resolution |   Params    |
-|:-----------|:----------:|:-----------:|
-| Alice      |  30        |   New York  |
-| Bob        |  25        | Los Angeles |
-| Charlie    |  35        |    Chicago  |
+|Model|Size (pixels)|Params (M)|Keypoints|
+|:----|:-----------:|:--------:|:-------:|
+|[YOLOv8x-pose-p6](https://github.com/ultralytics/assets/releases/download/v8.2.0/yolov8x-pose-p6.pt)|1280|99.1|17|
+|Pose-ResNet18-Body|256|15|17(?)|
 
 ## Demo
 To see the demo, open and run the <code>main.ipynb</code> file.
