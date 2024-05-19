@@ -1,7 +1,10 @@
 # PosEmotion
 
-## Data Preparation
+Introduction
+
+## Requirements
 For this project EiLA (Latin-American) dataset was used, and it has the following structure:
+```
 │posemotion/
 ├──assets/
 │  ├── annotations
@@ -20,3 +23,14 @@ For this project EiLA (Latin-American) dataset was used, and it has the followin
 │  ├── yolo-face.pt
 │  ├── yolo-pose.pt
 │......
+```
+
+## Models
+
+## Demo
+
+## Results
+
+## BibTex
+
+## Acknowledgement
