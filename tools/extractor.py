@@ -19,6 +19,8 @@ class Extractor:
         :return: a list of ranges.
         """
         df = pd.read_csv(self.annotations)
+        df = df.drop(columns=["X", "Y", "Width", "Height"])
+        
         base = (None, None, None)
         start_i = 0
         segments = []
