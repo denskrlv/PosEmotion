@@ -9,7 +9,9 @@ Abstract
 ## Introduction
 
 ## Requirements
-For this project EiLA (Latin-American) dataset was used. To run scripts succesfully, all data should have the the following structure:
+Before running the project, install all necessary packages using <code>pip install -r requirements.txt</code>.
+
+For this project EiLA (Latin-American) dataset was used. The data should have the the following structure:
 ```
 │posemotion/
 ├── assets/

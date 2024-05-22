@@ -1,8 +1,8 @@
 # !/usr/bin/env python3
 
 import cv2
+from keypoints import Keypoints
 import mediapipe as mp
-
 from ultralytics import YOLO
 
 
@@ -10,26 +10,33 @@ class Detector:
 
     def __init__(self, directory: str):
         self.directory = directory
+        self.keypoints = Keypoints()
 
 
     def detect_pose(self, target, model, resize=(1280, 720)):
-        mp_draw = mp.solutions.drawing_utils
-        mp_pose = mp.solutions.pose
-        pose = mp_pose.Pose(static_image_mode=True, model_complexity=2, min_detection_confidence=0.5)
+        keys = Keypoints()
+        model = YOLO('/Users/deniskrylov/Developer/PosEmotion/models/yolo-pose.pt')
 
-        image = cv2.imread(target)
-        if image is None:
-            print("Failed to load image.")
-            return None
-        else:
-            img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            result = pose.process(img_rgb)
+        img = cv2.imread('/Users/deniskrylov/Developer/PosEmotion/assets/frames/aJKL0ahn1Dk_19532.jpg')
+        results = model('/Users/deniskrylov/Developer/PosEmotion/assets/frames/aJKL0ahn1Dk_19532.jpg')[0]
 
-        if result.pose_landmarks:
-            mp_draw.draw_landmarks(image, result.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-            for id, lm in enumerate(result.pose_landmarks.landmark):
-                h, w, c = image.shape
-                cx, cy = int(lm.x * w), int(lm.y * h)
-                cv2.circle(image, (cx, cy), 5, (255, 0, 0), cv2.FILLED)
-            cv2.imshow("Image", image)
-            cv2.waitKey(0)
+        for result in results:
+            print(result.keypoints.xy.numpy().tolist()[0])
+            for keypoint_idx, keypoint in enumerate(result.keypoints.xy.numpy().tolist()[0]):
+                print(keypoint_idx, keypoint)
+                # cv2.putText(img, str(keypoint_idx), (int(keypoint[0]), int(keypoint[1])),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+        # cv2.imshow('image', img)
+        # cv2.waitKey(0)
+
+# keys = Keypoints()
+model = YOLO('/Users/deniskrylov/Developer/PosEmotion/models/yolo-pose.pt')
+
+img = cv2.imread('/Users/deniskrylov/Developer/PosEmotion/assets/frames/aJKL0ahn1Dk_19532.jpg')
+results = model('/Users/deniskrylov/Developer/PosEmotion/assets/frames/aJKL0ahn1Dk_19532.jpg')[0]
+
+for result in results:
+    print(result.keypoints.xy.numpy().tolist()[0])
+    for keypoint_idx, keypoint in enumerate(result.keypoints.xy.numpy().tolist()[0]):
+        print(keypoint_idx, keypoint)
