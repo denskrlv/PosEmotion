@@ -31,6 +31,7 @@ class Keypoints():
     def __str__(self):
         return (
             "Keypoints:"
+            f"\nImage: {self.image}"
             f"\nNose: {self.nose}"
             f"\nLeft Eye: {self.left_eye}"
             f"\nRight Eye: {self.right_eye}"
@@ -59,21 +60,23 @@ class Keypoints():
         return keys
     
     def draw(self):
-        self._add_labels()          
-        cv2.imshow('image', self.image)
+        img = cv2.imread(self.image)
+        self._add_labels(img)          
+        cv2.imshow('image', img)
         cv2.waitKey(0)
     
     def draw_ipython(self):
-        self._add_labels()          
-        _, encoded_image = cv2.imencode('.jpg', self.image)
+        img = cv2.imread(self.image)
+        self._add_labels(img)          
+        _, encoded_image = cv2.imencode('.jpg', img)
         encoded_image_bytes = encoded_image.tobytes()
         display(Image(data=encoded_image_bytes))
 
-    def _add_labels(self):
-        if self.image is None:
+    def _add_labels(self, img):
+        if img is None:
             raise ValueError(f"Unable to read the image!")
         
         for var_name, var_value in vars(self).items():
             if var_name != 'image' and var_value != [0.0, 0.0]:
-                cv2.putText(self.image, str(var_name), (int(var_value[0]), int(var_value[1])),
+                cv2.putText(img, str(var_name), (int(var_value[0]), int(var_value[1])),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
