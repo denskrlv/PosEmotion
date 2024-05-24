@@ -74,6 +74,6 @@ class Keypoints():
             raise ValueError(f"Unable to read the image!")
         
         for var_name, var_value in vars(self).items():
-            if var_name != 'image':
+            if var_name != 'image' and var_value != [0.0, 0.0]:
                 cv2.putText(self.image, str(var_name), (int(var_value[0]), int(var_value[1])),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
