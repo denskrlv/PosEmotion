@@ -50,6 +50,14 @@ class Keypoints():
             f"\nRight Ankle: {self.right_ankle}"
         )
     
+    def to_dict(self):
+        keys = {}
+        for var_name, var_value in vars(self).items():
+            if var_name != 'image':
+                keys[var_name + "_X"] = var_value[0]
+                keys[var_name + "_Y"] = var_value[1]
+        return keys
+    
     def draw(self):
         self._add_labels()          
         cv2.imshow('image', self.image)

@@ -1,42 +1,34 @@
 # !/usr/bin/env python3
 
 import cv2
-from keypoints import Keypoints
+from tools.keypoints import Keypoints
 import mediapipe as mp
 from ultralytics import YOLO
 
 
-class Detector:
+Emotions = {
+    "Happy"     : 0,
+    "Sad"       : 1,
+    "Fear"      : 2,
+    "Neutral"   : 3,
+    "Surprise"  : 4,
+    "Disgust"   : 5,
+    "Anger"     : 6
+}
 
-    def __init__(self, directory: str):
-        self.directory = directory
-        self.keypoints = Keypoints()
 
+def detect_poses(target, model, resize=(1280, 720)):
+    img = cv2.imread(target)
+    keypoints = []
 
-    def detect_pose(self, target, model, resize=(1280, 720)):
-        keys = Keypoints()
-        model = YOLO('/Users/deniskrylov/Developer/PosEmotion/models/yolo-pose.pt')
-
-        img = cv2.imread('/Users/deniskrylov/Developer/PosEmotion/assets/frames/aJKL0ahn1Dk_19532.jpg')
-        results = model('/Users/deniskrylov/Developer/PosEmotion/assets/frames/aJKL0ahn1Dk_19532.jpg')[0]
-
-        for result in results:
-            print(result.keypoints.xy.numpy().tolist()[0])
-            for keypoint_idx, keypoint in enumerate(result.keypoints.xy.numpy().tolist()[0]):
-                print(keypoint_idx, keypoint)
-                # cv2.putText(img, str(keypoint_idx), (int(keypoint[0]), int(keypoint[1])),
-                #             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-
-        # cv2.imshow('image', img)
-        # cv2.waitKey(0)
-
-# keys = Keypoints()
-model = YOLO('/Users/deniskrylov/Developer/PosEmotion/models/yolo-pose.pt')
-
-img = cv2.imread('/Users/deniskrylov/Developer/PosEmotion/assets/frames/aJKL0ahn1Dk_19532.jpg')
-results = model('/Users/deniskrylov/Developer/PosEmotion/assets/frames/aJKL0ahn1Dk_19532.jpg')[0]
-
-for result in results:
-    print(result.keypoints.xy.numpy().tolist()[0])
-    for keypoint_idx, keypoint in enumerate(result.keypoints.xy.numpy().tolist()[0]):
-        print(keypoint_idx, keypoint)
+    if model == 'yolo':
+        model = YOLO("/Users/deniskrylov/Developer/PosEmotion/models/yolo-pose.pt")
+        results = model(target)
+        print(results)
+        # for result in results:
+        #     for _, keypoint in enumerate(result.keypoints.xy.numpy().tolist()[0]):
+        #         keypoints.append(keypoint)
+    else:
+        raise ValueError('Choose a valid model: yolo, openpose or alpha-pose!')
+    
+    return Keypoints(image=img, keys=keypoints)

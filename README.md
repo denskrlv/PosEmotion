@@ -41,7 +41,7 @@ These pre-trained models were used:
 |Pose-ResNet18-Body|256|15|17(?)|
 
 ## Demo
-To see the demo, open and run the <code>main.ipynb</code> file.
+To see the demo, open and run the <code>app.ipynb</code> file.
 
 ## Results
 
