@@ -10,23 +10,23 @@ class Keypoints():
 
     def __init__(self, image, keys):
         self.image = image
-        self.nose = keys[0]
-        self.left_eye = keys[1]
-        self.right_eye = keys[2]
-        self.left_ear = keys[3]
-        self.right_ear = keys[4]
-        self.left_shoulder = keys[5]
-        self.right_shoulder = keys[6]
-        self.left_elbow = keys[7]
-        self.right_elbow = keys[8]
-        self.left_wrist = keys[9]
-        self.right_wrist = keys[10]
-        self.left_hip = keys[11]
-        self.right_hip = keys[12]
-        self.left_knee = keys[13]
-        self.right_knee = keys[14]
-        self.left_ankle = keys[15]
-        self.right_ankle = keys[16]
+        self.nose = self._extract_with_index(keys, 0)
+        self.left_eye = self._extract_with_index(keys, 1)
+        self.right_eye = self._extract_with_index(keys, 2)
+        self.left_ear = self._extract_with_index(keys, 3)
+        self.right_ear = self._extract_with_index(keys, 4)
+        self.left_shoulder = self._extract_with_index(keys, 5)
+        self.right_shoulder = self._extract_with_index(keys, 6)
+        self.left_elbow = self._extract_with_index(keys, 7)
+        self.right_elbow = self._extract_with_index(keys, 8)
+        self.left_wrist = self._extract_with_index(keys, 9)
+        self.right_wrist = self._extract_with_index(keys, 10)
+        self.left_hip = self._extract_with_index(keys, 11)
+        self.right_hip = self._extract_with_index(keys, 12)
+        self.left_knee = self._extract_with_index(keys, 13)
+        self.right_knee = self._extract_with_index(keys, 14)
+        self.left_ankle = self._extract_with_index(keys, 15)
+        self.right_ankle = self._extract_with_index(keys, 16)
 
     def __str__(self):
         return (
@@ -80,3 +80,9 @@ class Keypoints():
             if var_name != 'image' and var_value != [0.0, 0.0]:
                 cv2.putText(img, str(var_name), (int(var_value[0]), int(var_value[1])),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                
+    def _extract_with_index(self, keys, index):
+        if keys[index] == [0.0, 0.0]:
+            return [None, None]
+        else:
+            return keys[index]

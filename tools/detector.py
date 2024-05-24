@@ -19,7 +19,6 @@ Emotions = {
 
 
 def detect_poses(image, model, resize=(1280, 720)):
-    keys = []
     results = model(image)[0]
     keypoints = results.keypoints.xy.numpy().tolist()[0]
 
@@ -30,4 +29,4 @@ def detect_poses(image, model, resize=(1280, 720)):
 
 
 def _empty_keypoints():
-    return [[None, None]] * 17
+    return [[0, 0]] * 17
