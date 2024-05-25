@@ -59,25 +59,50 @@ class Keypoints():
                 keys[var_name + "_Y"] = var_value[1]
         return keys
     
-    def draw(self):
+    def draw(self, add_labels=True):
         img = cv2.imread(self.image)
-        self._add_labels(img)          
+        if add_labels:
+            self._add_labels(img) 
+        self._add_lines(img)        
         cv2.imshow('image', img)
         cv2.waitKey(0)
     
-    def draw_ipython(self):
+    def draw_ipython(self, add_labels=True):
         img = cv2.imread(self.image)
-        self._add_labels(img)          
+        if add_labels:
+            self._add_labels(img)
+        self._add_lines(img)        
         _, encoded_image = cv2.imencode('.jpg', img)
         encoded_image_bytes = encoded_image.tobytes()
         display(Image(data=encoded_image_bytes))
+
+    def _add_lines(self, img):
+        connections = [
+            (self.nose, self.left_eye), (self.nose, self.right_eye),
+            (self.left_eye, self.left_ear), (self.right_eye, self.right_ear),
+            (self.left_shoulder, self.right_shoulder),
+            (self.left_shoulder, self.left_elbow), (self.right_shoulder, self.right_elbow),
+            (self.left_elbow, self.left_wrist), (self.right_elbow, self.right_wrist),
+            (self.left_hip, self.right_hip),
+            (self.left_shoulder, self.left_hip), (self.right_shoulder, self.right_hip),
+            (self.left_hip, self.left_knee), (self.right_hip, self.right_knee),
+            (self.left_knee, self.left_ankle), (self.right_knee, self.right_ankle)
+        ]
+
+        for start, end in connections:
+            if start != [None, None] and end != [None, None]:
+                cv2.line(img, (int(start[0]), int(start[1])), (int(end[0]), int(end[1])), (255, 0, 0), 2)
+
+        for var_name, var_value in vars(self).items():
+            if var_name != 'image' and var_value != [None, None]:
+                cv2.circle(img, (int(var_value[0]), int(var_value[1])), 5, (0, 255, 0), -1)
 
     def _add_labels(self, img):
         if img is None:
             raise ValueError(f"Unable to read the image!")
         
         for var_name, var_value in vars(self).items():
-            if var_name != 'image' and var_value != [0.0, 0.0]:
+            if var_name != 'image' and var_value != [None, None]:
                 cv2.putText(img, str(var_name), (int(var_value[0]), int(var_value[1])),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
                 
