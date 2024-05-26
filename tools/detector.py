@@ -1,32 +1,28 @@
 # !/usr/bin/env python3
 
-import cv2
-import numpy as np
+import os
 from tools.keypoints import Keypoints
-import mediapipe as mp
 from ultralytics import YOLO
 
 
-Emotions = {
-    "Happy"     : 0,
-    "Sad"       : 1,
-    "Fear"      : 2,
-    "Neutral"   : 3,
-    "Surprise"  : 4,
-    "Disgust"   : 5,
-    "Anger"     : 6
-}
+def _empty_keypoints(count=17):
+        return [[0, 0]] * count
 
 
-def detect_poses(image, model, resize=(1280, 720)):
-    results = model(image)[0]
-    keypoints = results.keypoints.xy.numpy().tolist()[0]
+class Detector:
 
-    if keypoints != []:
-        return Keypoints(image=image, keys=keypoints)
-    else:
-        return Keypoints(image=image, keys=_empty_keypoints())
+    CORE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+    def __init__(self, model_path):
+        self.model = YOLO(os.path.join(self.CORE_DIR, model_path))
 
-def _empty_keypoints():
-    return [[0, 0]] * 17
+    def detect_poses(self, file_path):
+        file_path = os.path.join(self.CORE_DIR, file_path)
+
+        results = self.model(file_path)[0]
+        keypoints = results.keypoints.xy.numpy().tolist()[0]
+
+        if keypoints != []:
+            return Keypoints(image=file_path, keys=keypoints)
+        else:
+            return Keypoints(image=file_path, keys=_empty_keypoints())

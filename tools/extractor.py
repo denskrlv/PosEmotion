@@ -8,10 +8,12 @@ import pandas as pd
 
 class Extractor:
 
-    def __init__(self, annotations, extract_from=None, extract_to=None):
-        self.annotations = annotations
-        self.extract_from = extract_from
-        self.extract_to = extract_to
+    CORE_DIR = os.path.dirname(os.path.dirname(__file__))
+
+    def __init__(self, annotations, extract_from, extract_to):
+        self.annotations = os.path.join(self.CORE_DIR, annotations)
+        self.extract_from = os.path.join(self.CORE_DIR, extract_from)
+        self.extract_to = os.path.join(self.CORE_DIR, extract_to)
 
     def extract_segments(self):
         df = pd.read_csv(self.annotations)
@@ -32,7 +34,7 @@ class Extractor:
 
         return segments
 
-    def extract_frames(self, drop_duplicates=False):
+    def extract_frames(self):
         if not os.path.exists(self.extract_to):
             os.makedirs(self.extract_to)
 

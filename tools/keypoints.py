@@ -2,11 +2,13 @@
 
 from IPython.display import display, Image
 import cv2
+import os
+import pandas as pd
 
 
 class Keypoints():
-    """Class to store and show the keypoints of a person detected in an image.
-    """
+
+    CORE_DIR = os.path.dirname(os.path.dirname(__file__))
 
     def __init__(self, image, keys):
         self.image = image
