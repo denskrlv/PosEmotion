@@ -3,10 +3,18 @@
 from IPython.display import display, Image
 import cv2
 import os
-import pandas as pd
 
 
-class Keypoints():
+class Segment:
+
+    def __init__(self, df):
+        self.df = df
+
+    def indices(self):
+        return (self.df.index[0], self.df.index[-1])
+
+
+class Keypoints:
 
     CORE_DIR = os.path.dirname(os.path.dirname(__file__))
 

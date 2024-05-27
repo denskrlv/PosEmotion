@@ -15,25 +15,6 @@ class Extractor:
         self.extract_from = os.path.join(self.CORE_DIR, extract_from)
         self.extract_to = os.path.join(self.CORE_DIR, extract_to)
 
-    def extract_segments(self):
-        df = pd.read_csv(self.annotations)
-        df = df.drop(columns=["X", "Y", "Width", "Height"])
-        
-        base = (None, None, None)
-        start_i = 0
-        segments = []
-
-        for index, row in df.iterrows():
-            if base == (None, None, None):
-                base = (row['Video Tag'], row['Clip Id'], row['Person Id'])
-                continue
-            if (row['Video Tag'], row['Clip Id'], row['Person Id']) != base:
-                base = (row['Video Tag'], row['Clip Id'], row['Person Id'])
-                segments.append((start_i, index-1))
-                start_i = index
-
-        return segments
-
     def extract_frames(self):
         if not os.path.exists(self.extract_to):
             os.makedirs(self.extract_to)
@@ -50,7 +31,6 @@ class Extractor:
             cv2.imwrite(os.path.join(self.extract_to, video_tag + "_" + str(index) + ".jpg"), frame)
             progress += 1
             print("Progress: {}/{}".format(progress, total))
-
 
     def _extract_frame(self, video_path, frame_no, x, y, w, h):
         cam = cv2.VideoCapture(video_path)
@@ -71,7 +51,6 @@ class Extractor:
         frame = self._mask_frame(frame, x, y, w, h)
 
         return frame
-    
 
     def _mask_frame(self, frame, x, y, w, h):
         mask = np.zeros(frame.shape[:2], dtype="uint8")
@@ -87,7 +66,6 @@ class Extractor:
         cv2.rectangle(frame, (x, y), (x + w, y + h), (128,128,128), 2)
 
         return masked_frame
-
 
     def _remove_duplicates(self, columns):
         df = pd.read_csv(self.annotations)
