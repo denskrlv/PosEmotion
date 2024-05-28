@@ -10,6 +10,9 @@ class Segment:
     def __init__(self, df):
         self.df = df
 
+    def __len__(self):
+        return len(self.df)
+
     def indices(self):
         return (self.df.index[0], self.df.index[-1])
 

@@ -43,8 +43,12 @@ def segmentate(df):
     segments = []
     base = (None, None, None)
     start_i = 0
+    num = 0
 
-    df = df.drop(columns=["X", "Y", "Width", "Height"])
+    columns_to_drop = ["X", "Y", "Width", "Height"]
+    for column in columns_to_drop:
+        if column in df.columns:
+            df = df.drop(columns=column)
 
     for index, row in df.iterrows():
         if base == (None, None, None):
@@ -54,6 +58,7 @@ def segmentate(df):
             base = (row['Video Tag'], row['Clip Id'], row['Person Id'])
             segments.append(Segment(df.loc[start_i:index-1]))
             start_i = index
+            num += 1
     
     if start_i < df.shape[0]:
         segments.append(Segment(df.loc[start_i:]))
@@ -61,44 +66,31 @@ def segmentate(df):
     return segments
 
 
-def normalize_segments(df, target_size=10, after="Anger"):
-    df = remove_empty_keypoints(df, after)
-
-    segments = segmentate(df)
+def normalize_segment(segment, target_size=10, after="Anger"):
+    df = remove_empty_keypoints(segment.df, after).reset_index(drop=True)
+    start, end = 0, len(df)-1
+    length = end - start + 1
     rows_inserted = 0
 
-    to_drop = []
-    to_duplicate = []
-    for start, end in segments:
-        length = end - start + 1
-        if length < target_size:
-            to_duplicate.append((start, end))
-        elif length > target_size:
-            to_drop.append((start, end))
-
-    for start, end in to_drop:
-        segment_pivots = list(np.linspace(start, end, target_size, dtype=int))
+    segment_pivots = list(np.linspace(start, end, target_size, dtype=int))
+    if length > target_size:
         redundant_indices = _get_redundant_indices(start, end, segment_pivots)
-        df = df.drop(index=redundant_indices)
-        df = df.reset_index(drop=True)
-
-    # for start, end in segments:
-    #     length = end - start + 1
-    #     segment_pivots = list(np.linspace(start, end, target_size, dtype=int))
-    #     if length > target_size:
-    #         redundant_indices = _get_redundant_indices(start, end, segment_pivots)
-    #         df = df.drop(index=redundant_indices)
-    #     elif length < target_size:
-            # duplicate_rows = _get_duplicate_indices(segment_pivots)
-            # for index in duplicate_rows:
-            #     adjusted_index = index + rows_inserted
-            #     duplicated_row = df.iloc[[adjusted_index]]
-            #     upper = df.iloc[:adjusted_index+1]
-            #     lower = df.iloc[adjusted_index+1:]
-            #     df = pd.concat([upper, duplicated_row, lower]).reset_index(drop=True)
-            #     rows_inserted += 1
+        df = df.drop(index=redundant_indices).reset_index(drop=True)
+    elif length < target_size:
+        duplicate_rows = _get_duplicate_indices(segment_pivots)
+        for index in duplicate_rows:
+            adjusted_index = index + rows_inserted
+            duplicated_row = df.iloc[[adjusted_index]]
+            upper = df.iloc[:adjusted_index+1]
+            lower = df.iloc[adjusted_index+1:]
+            df = pd.concat([upper, duplicated_row, lower]).reset_index(drop=True)
+            rows_inserted += 1
     
-    return df
+    return Segment(df)
+
+
+def normalize_frames(df):
+    pass
 
 
 def remove_empty_keypoints(df, after="Anger"):
