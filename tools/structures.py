@@ -64,6 +64,22 @@ class Keypoints:
             f"\nRight Ankle: {self.right_ankle}"
         )
     
+    def to_list(self):
+        return [self.nose, self.left_eye, self.right_eye, self.left_ear, self.right_ear,
+                self.left_shoulder, self.right_shoulder, self.left_elbow, self.right_elbow,
+                self.left_wrist, self.right_wrist, self.left_hip, self.right_hip,
+                self.left_knee, self.right_knee, self.left_ankle, self.right_ankle]
+    
+    def extract_base(self):
+        return [self.right_shoulder, self.left_shoulder, self.right_hip, self.left_hip]
+    
+    def categorize(self):
+        return {
+            "head": [0, 1, 2, 3, 4],
+            "left_side": [1, 3, 5, 7, 9, 11, 13, 15],
+            "right_side": [2, 4, 6, 8, 10, 12, 14, 16]
+        }
+    
     def to_dict(self):
         keys = {}
         for var_name, var_value in vars(self).items():
