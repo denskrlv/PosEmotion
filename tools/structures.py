@@ -1,8 +1,9 @@
 # !/usr/bin/env python3
 
-from IPython.display import display, Image
 import cv2
 import os
+
+from IPython.display import display, Image
 
 
 class Segment:

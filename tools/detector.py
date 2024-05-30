@@ -1,6 +1,7 @@
 # !/usr/bin/env python3
 
 import os
+
 from tools.structures import Keypoints
 from ultralytics import YOLO
 

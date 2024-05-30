@@ -1,12 +1,10 @@
 # !/usr/bin/env python3
 
 import ast
-import cv2
-import math
 import numpy as np
 import os
 import pandas as pd
-from PIL import Image
+
 from tools.structures import Keypoints, Segment
 
 
@@ -23,19 +21,18 @@ Emotions = {
 }
 
 
-def prepare_base_skeleton(size=(1280, 720), skeleton_path="assets/base_skeleton.png"):
-    background = Image.new('RGBA', size, (0, 0, 0, 255))
-    foreground = Image.open(skeleton_path).convert("RGBA")
-
-    bg_width, bg_height = background.size
-    fg_width, fg_height = foreground.size
-    position = ((bg_width - fg_width) // 2, (bg_height - fg_height) // 2)
-
-    background.paste(foreground, position, foreground)
-    return background
-
-
 def label_probabilities(df, labels_column="Labels", preserve=False):
+    """
+    This function calculates the probabilities of each label in the given DataFrame.
+
+    Args:
+        df (pandas.DataFrame): The input DataFrame which contains the labels.
+        labels_column (str, optional): The name of the column in the DataFrame that contains the labels. Defaults to "Labels".
+        preserve (bool, optional): If set to True, the original labels column is preserved in the returned DataFrame. If False, the labels column is dropped. Defaults to False.
+
+    Returns:
+        pandas.DataFrame: A DataFrame with the same rows as the input, but with additional columns for each label. Each new column contains the probability of that label for the corresponding row in the input DataFrame. The probabilities are rounded to 2 decimal places.
+    """
     probs = []
 
     for _, row in df.iterrows():
@@ -58,6 +55,22 @@ def label_probabilities(df, labels_column="Labels", preserve=False):
 
 
 def segmentate(df):
+    """
+    This function segments the input DataFrame into different segments based on changes in 'Video Tag', 'Clip Id', and 'Person Id'.
+
+    Args:
+        df (pandas.DataFrame): The input DataFrame which contains the columns 'Video Tag', 'Clip Id', 'Person Id' 
+        and possibly 'X', 'Y', 'Width', 'Height'.
+
+    Returns:
+        list: A list of Segment objects. Each Segment object represents a segment of the input DataFrame where 
+        'Video Tag', 'Clip Id', and 'Person Id' are constant.
+
+    The function first drops the columns 'X', 'Y', 'Width', 'Height' if they exist in the DataFrame. 
+    Then it iterates over the rows of the DataFrame. When it detects a change in 'Video Tag', 'Clip Id', or 'Person Id', 
+    it creates a new Segment with the rows up to that point and starts a new segment. 
+    After iterating over all rows, it creates a Segment with the remaining rows if any are left.
+    """
     segments = []
     base = (None, None, None)
     start_i = 0
@@ -85,6 +98,26 @@ def segmentate(df):
 
 
 def normalize_segment(segment, target_size=10, after="Anger"):
+    """
+    This function normalizes the length of a segment to a target size by either removing or duplicating rows.
+
+    Args:
+        segment (Segment): The input Segment object which contains a DataFrame to be normalized.
+        target_size (int, optional): The target number of rows for the segment. Defaults to 10.
+        after (str, optional): The name of the column in the DataFrame after which empty keypoints are removed. Defaults to "Anger".
+
+    Returns:
+        Segment: A new Segment object with the normalized DataFrame.
+
+    The function first removes empty keypoints from the DataFrame and resets its index. Then it calculates the start and end indices 
+    of the DataFrame and the length of the DataFrame.
+
+    If the length of the DataFrame is greater than the target size, it calculates the indices of redundant rows and 
+    drops them from the DataFrame. If the length of the DataFrame is less than the target size, it calculates 
+    the indices of rows to be duplicated and inserts duplicates of these rows into the DataFrame.
+
+    Finally, it returns a new Segment with the normalized DataFrame.
+    """
     df = remove_empty_keypoints(segment.df, after).reset_index(drop=True)
     start, end = 0, len(df)-1
     length = end - start + 1
@@ -107,72 +140,54 @@ def normalize_segment(segment, target_size=10, after="Anger"):
     return Segment(df)
 
 
-def normalize_skeleton(keypoints, base):
-    keypoints = align_with(base, keypoints)
-    
-    angle, z_best, s1, s2 = _find_optimal_rotation(keypoints, base)
-    keypoints = _rotate_around_y(keypoints, angle, z_best, s1, s2)
-    
-    return keypoints
+def normalize_skeleton(keypoints, box):
+    """
+    This function normalizes the keypoints based on the bounding box.
 
+    Args:
+        keypoints (Keypoints): The input Keypoints object which contains the keypoints to be normalized.
+        box (tuple): A tuple containing the x, y coordinates and the width and height of the bounding box.
 
-def align_with(base, points):
-    keypoints = points.to_list()
-    base_points = base.to_list()
-    result_points = []
+    Returns:
+        Keypoints: A new Keypoints object with the normalized keypoints.
 
-    src_points = np.array(keypoints, dtype=np.float32)
-    dst_points = np.array(base_points, dtype=np.float32)
+    The function first extracts the x, y coordinates and the width and height from the bounding box. 
+    Then it converts the keypoints to a list and initializes an empty list for the normalized keypoints.
 
-    M, _ = cv2.estimateAffinePartial2D(src_points, dst_points)
-    transformed_keypoints = cv2.transform(np.array([src_points]), M)[0]
+    It then iterates over the keypoints. For each keypoint, if both coordinates are not None, it subtracts the x, y coordinates 
+    of the bounding box from the keypoint coordinates and divides the result by the width and height of the bounding box, respectively. 
+    The normalized keypoint is then added to the list of normalized keypoints. If either coordinate of the keypoint is None, 
+    a keypoint of (0, 0) is added to the list of normalized keypoints.
 
-    for (x, y) in transformed_keypoints:
-        if np.isnan(x):
-            x = 0
-        if np.isnan(y):
-            y = 0
-        result_points.append([x, y])
-
-    return Keypoints(image=points.image, keys=result_points)
-
-
-def euclidean_dist_2d(point1, point2):
-    x1, y1, = point1
-    x2, y2, = point2
-    return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-
-
-def euclidean_dist_3d(point1, point2):
-    x1, y1, _ = point1
-    x2, y2, _ = point2
-    return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-
-
-def _rotate_around_y(keypoints, angle, z_best, s1, s2):
+    Finally, it returns a new Keypoints object with the normalized keypoints and the same image as the input keypoints.
+    """
+    x, y, w, h = box
     kl = keypoints.to_list()
-    rotated_keypoints = [kl[0]]
-    
-    for i in range(1, len(kl)):
-        if i % 2 == 1:
-            if kl[i] != [None, None]:
-                left = kl[i] + [s1 * z_best]
-                rotated_left = _rotate_around_axis_3d([left], np.radians(angle))
-                rotated_keypoints.append(list(rotated_left[0][:2]))
-            else:
-                rotated_keypoints.append([None, None])
+    norm_keypoints = []
+
+    for k in kl:
+        if k[0] != None and k[1] != None:
+            k = np.array(k)
+            k[0] = (k[0] - x) / w
+            k[1] = (k[1] - y) / h
+            norm_keypoints.append([k[0], k[1]])
         else:
-            if kl[i] != [None, None]:
-                right = kl[i] + [s2 * z_best]
-                rotated_right = _rotate_around_axis_3d([right], np.radians(angle))
-                rotated_keypoints.append(list(rotated_right[0][:2]))
-            else:
-                rotated_keypoints.append([None, None])
+            norm_keypoints.append([0, 0])
     
-    return Keypoints(image=keypoints.image, keys=rotated_keypoints)
+    return Keypoints(image=keypoints.image, keys=norm_keypoints)
 
 
 def remove_empty_keypoints(df, after="Anger"):
+    """
+    Remove rows from a DataFrame where all the keypoints columns after a specified column are empty.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame to remove empty keypoints from.
+        after (str, optional): The column name after which to start checking for empty keypoints. Defaults to "Anger".
+
+    Returns:
+        pandas.DataFrame: The DataFrame with rows containing empty keypoints removed.
+    """
     col_index = df.columns.get_loc(after)
     keypoints_columns = df.columns[col_index + 1:]
     df = df.dropna(subset=keypoints_columns, how="all")
@@ -180,67 +195,18 @@ def remove_empty_keypoints(df, after="Anger"):
     return df
 
 
-def _determine_rotation_direction(keypoints):
-    kl = keypoints.to_list()
-    nose_x, _ = kl[0]
-    left_eye_x, _ = kl[1]
-    right_eye_x, _ = kl[2]
-    
-    # Calculate the average x position of the eyes
-    eye_center_x = (left_eye_x + right_eye_x) / 2
-    
-    # Determine direction based on nose and eye center position
-    if nose_x < eye_center_x:
-        return 1
-    else:
-        return -1
-
-
-def _find_optimal_rotation(points, base_points):
-    angle = 0
-    z_best = 0
-    rest = 10000000
-    prev_rest = 10000000
-
-    points_base = np.array(points.extract_base())
-    base_points_base = np.array(base_points.extract_base())
-
-    target_dist = euclidean_dist_2d(base_points_base[0], base_points_base[1])
-    side = _determine_rotation_direction(points)
-    if side == 1:
-        s1, s2 = 1, -1
-    else:
-        s1, s2 = -1, 1
-
-    for z in range(int(target_dist)):
-        left_shoulder_3d = np.append(points_base[0], s1 * z)
-        right_shoulder_3d = np.append(points_base[1], s2 * z)
-    
-        for i in range(90):
-            rotated_points = _rotate_around_axis_3d([left_shoulder_3d, right_shoulder_3d], np.radians(i))
-            dist = euclidean_dist_3d(rotated_points[0], rotated_points[1])
-            rest = abs(target_dist - dist)
-            if rest < prev_rest:
-                prev_rest = rest
-                angle = i
-                z_best = z
-
-    return angle, z_best, s1, s2
-    
-
-def _rotate_around_axis_3d(points, theta):
-    rotation_matrix = np.array([
-        [np.cos(theta), 0, np.sin(theta)],
-        [0, 1, 0],
-        [-np.sin(theta), 0, np.cos(theta)]
-    ])
-
-    rotated_points = np.dot(points, rotation_matrix.T)
-
-    return rotated_points
-
-
 def _get_redundant_indices(start, end, segment_pivots):
+    """
+    Returns a list of redundant indices within the given range.
+
+    Args:
+        start (int): The starting index of the range.
+        end (int): The ending index of the range.
+        segment_pivots (list): A list of indices that are considered as pivots.
+
+    Returns:
+        list: A list of redundant indices within the given range.
+    """
     segment_indices = set(range(start, end+1))
     segment_pivots = set(segment_pivots)
     diff = segment_indices - segment_pivots
@@ -248,6 +214,15 @@ def _get_redundant_indices(start, end, segment_pivots):
 
 
 def _get_duplicate_indices(array):
+    """
+    Returns a list of duplicate elements in the given array.
+
+    Args:
+        array (list): The input array.
+
+    Returns:
+        list: A list of duplicate elements in the array.
+    """
     duplicates = set()
     result = []
     for elem in array:
@@ -259,6 +234,15 @@ def _get_duplicate_indices(array):
 
 
 def _remove_empty(array):
+    """
+    Removes empty elements from the given array.
+
+    Args:
+        array (list): The input array.
+
+    Returns:
+        list: The array with empty elements removed.
+    """
     for i in range(len(array)):
         if array[i] == "No annotation":
             array[i] = [""]
@@ -267,6 +251,15 @@ def _remove_empty(array):
 
 
 def _real_size(array):
+    """
+    Calculates the number of non-empty labels in the given array.
+
+    Parameters:
+    array (list): The array containing labels.
+
+    Returns:
+    int: The count of non-empty labels in the array.
+    """
     count = 0
     for label in array:
         if label != [""]:
