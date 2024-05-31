@@ -21,7 +21,7 @@ Emotions = {
 }
 
 
-def label_probabilities(df, labels_column="Labels", preserve=False):
+def label_probabilities(df: pd.DataFrame, labels_column: str="Labels", preserve: bool=False) -> pd.DataFrame:
     """
     This function calculates the probabilities of each label in the given DataFrame.
 
@@ -54,7 +54,7 @@ def label_probabilities(df, labels_column="Labels", preserve=False):
     return pd.concat([df, probs_df], ignore_index=False, axis=1)
 
 
-def segmentate(df):
+def segmentate(df: pd.DataFrame) -> list[Segment]:
     """
     This function segments the input DataFrame into different segments based on changes in 'Video Tag', 'Clip Id', and 'Person Id'.
 
@@ -97,7 +97,7 @@ def segmentate(df):
     return segments
 
 
-def normalize_segment(segment, target_size=10, after="Anger"):
+def normalize_segment(segment: Segment, target_size: int=10, after: str="Anger") -> Segment:
     """
     This function normalizes the length of a segment to a target size by either removing or duplicating rows.
 
@@ -140,7 +140,7 @@ def normalize_segment(segment, target_size=10, after="Anger"):
     return Segment(df)
 
 
-def normalize_skeleton(keypoints, box):
+def normalize_skeleton(keypoints: Keypoints, box: tuple[float, float, float, float]) -> Keypoints:
     """
     This function normalizes the keypoints based on the bounding box.
 
@@ -166,7 +166,7 @@ def normalize_skeleton(keypoints, box):
     norm_keypoints = []
 
     for k in kl:
-        if k[0] != None and k[1] != None:
+        if k != [0, 0]:
             k = np.array(k)
             k[0] = (k[0] - x) / w
             k[1] = (k[1] - y) / h
@@ -174,10 +174,10 @@ def normalize_skeleton(keypoints, box):
         else:
             norm_keypoints.append([0, 0])
     
-    return Keypoints(image=keypoints.image, keys=norm_keypoints)
+    return Keypoints(keypoints=norm_keypoints)
 
 
-def remove_empty_keypoints(df, after="Anger"):
+def remove_empty_keypoints(df: pd.DataFrame, after: str="Anger") -> pd.DataFrame:
     """
     Remove rows from a DataFrame where all the keypoints columns after a specified column are empty.
 
@@ -195,7 +195,7 @@ def remove_empty_keypoints(df, after="Anger"):
     return df
 
 
-def _get_redundant_indices(start, end, segment_pivots):
+def _get_redundant_indices(start: int, end: int, segment_pivots: list[int]) -> list[int]:
     """
     Returns a list of redundant indices within the given range.
 
@@ -213,7 +213,7 @@ def _get_redundant_indices(start, end, segment_pivots):
     return list(diff)
 
 
-def _get_duplicate_indices(array):
+def _get_duplicate_indices(array: list[int]) -> list[int]:
     """
     Returns a list of duplicate elements in the given array.
 
@@ -233,7 +233,7 @@ def _get_duplicate_indices(array):
     return result
 
 
-def _remove_empty(array):
+def _remove_empty(array: list) -> list:
     """
     Removes empty elements from the given array.
 
@@ -250,7 +250,7 @@ def _remove_empty(array):
     return array
 
 
-def _real_size(array):
+def _real_size(array: list) -> int:
     """
     Calculates the number of non-empty labels in the given array.
 

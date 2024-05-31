@@ -24,6 +24,6 @@ class Detector:
         keypoints = results.keypoints.xy.numpy().tolist()[0]
 
         if keypoints != []:
-            return Keypoints(image=file_path, keys=keypoints)
+            return Keypoints(keypoints=keypoints)
         else:
-            return Keypoints(image=file_path, keys=_empty_keypoints())
+            return Keypoints(keypoints=_empty_keypoints())
