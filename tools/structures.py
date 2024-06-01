@@ -1,8 +1,8 @@
 # !/usr/bin/env python3
 
 import os
-
-from IPython.display import display, Image
+import numpy as np
+import pandas as pd
 
 
 class Segment:
@@ -17,107 +17,99 @@ class Segment:
         return (self.df.index[0], self.df.index[-1])
 
 
-class Keypoints:
+class Skeleton:
 
     CORE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-    def __init__(self, keypoints):
-        self.nose = keypoints[0]
-        self.left_eye = keypoints[1]
-        self.right_eye = keypoints[2]
-        self.left_ear = keypoints[3]
-        self.right_ear = keypoints[4]
-        self.left_shoulder = keypoints[5]
-        self.right_shoulder = keypoints[6]
-        self.left_elbow = keypoints[7]
-        self.right_elbow = keypoints[8]
-        self.left_wrist = keypoints[9]
-        self.right_wrist = keypoints[10]
-        self.left_hip = keypoints[11]
-        self.right_hip = keypoints[12]
-        self.left_knee = keypoints[13]
-        self.right_knee = keypoints[14]
-        self.left_ankle = keypoints[15]
-        self.right_ankle = keypoints[16]
+    def __init__(self, joints, image: str=None):
+        if isinstance(joints, dict):
+            self.joints = joints
+        elif isinstance(joints, list):
+            self.joints = self.to_dict(joints)
+        else:
+            raise TypeError("joints must be a list or a dictionary")
+        self.image = image
 
     def __str__(self):
         return (
-            "Keypoints:"
-            f"\nNose: {self.nose}"
-            f"\nLeft Eye: {self.left_eye}"
-            f"\nRight Eye: {self.right_eye}"
-            f"\nLeft Ear: {self.left_ear}"
-            f"\nRight Ear: {self.right_ear}"
-            f"\nLeft Shoulder: {self.left_shoulder}"
-            f"\nRight Shoulder: {self.right_shoulder}"
-            f"\nLeft Elbow: {self.left_elbow}"
-            f"\nRight Elbow: {self.right_elbow}"
-            f"\nLeft Wrist: {self.left_wrist}"
-            f"\nRight Wrist: {self.right_wrist}"
-            f"\nLeft Hip: {self.left_hip}"
-            f"\nRight Hip: {self.right_hip}"
-            f"\nLeft Knee: {self.left_knee}"
-            f"\nRight Knee: {self.right_knee}"
-            f"\nLeft Ankle: {self.left_ankle}"
-            f"\nRight Ankle: {self.right_ankle}"
+            "Joints:"
+            f"\nImage: {self.image}"
+            f"\nNose: {self.joints['nose']}"
+            f"\nLeft Eye: {self.joints['left_eye']}"
+            f"\nRight Eye: {self.joints['right_eye']}"
+            f"\nLeft Ear: {self.joints['left_ear']}"
+            f"\nRight Ear: {self.joints['right_ear']}"
+            f"\nLeft Shoulder: {self.joints['left_shoulder']}"
+            f"\nRight Shoulder: {self.joints['right_shoulder']}"
+            f"\nLeft Elbow: {self.joints['left_elbow']}"
+            f"\nRight Elbow: {self.joints['right_elbow']}"
+            f"\nLeft Wrist: {self.joints['left_wrist']}"
+            f"\nRight Wrist: {self.joints['right_wrist']}"
+            f"\nLeft Hip: {self.joints['left_hip']}"
+            f"\nRight Hip: {self.joints['right_hip']}"
+            f"\nLeft Knee: {self.joints['left_knee']}"
+            f"\nRight Knee: {self.joints['right_knee']}"
+            f"\nLeft Ankle: {self.joints['left_ankle']}"
+            f"\nRight Ankle: {self.joints['right_ankle']}"
         )
     
-    def get_head(self):
+    def to_dict(self, joints):
         return {
-            "nose": self.nose,
-            "left_eye": self.left_eye,
-            "right_eye": self.right_eye,
-            "left_ear": self.left_ear,
-            "right_ear": self.right_ear
+            "nose": _standartize(joints[0]),
+            "left_eye": _standartize(joints[1]),
+            "right_eye": _standartize(joints[2]),
+            "left_ear": _standartize(joints[3]),
+            "right_ear": _standartize(joints[4]),
+            "left_shoulder": _standartize(joints[5]),
+            "right_shoulder": _standartize(joints[6]),
+            "left_elbow": _standartize(joints[7]),
+            "right_elbow": _standartize(joints[8]),
+            "left_wrist": _standartize(joints[9]),
+            "right_wrist": _standartize(joints[10]),
+            "left_hip": _standartize(joints[11]),
+            "right_hip": _standartize(joints[12]),
+            "left_knee": _standartize(joints[13]),
+            "right_knee": _standartize(joints[14]),
+            "left_ankle": _standartize(joints[15]),
+            "right_ankle": _standartize(joints[16])
         }
     
-    def get_torso(self):
-        return {
-            "left_shoulder": self.left_shoulder,
-            "right_shoulder": self.right_shoulder,
-            "left_hip": self.left_hip,
-            "right_hip": self.right_hip
-        }
+    def to_series(self):
+        transformed_dict = {}
+        for key, value in self.joints.items():
+            transformed_dict[f"{key}_X"] = value[0]
+            transformed_dict[f"{key}_Y"] = value[1]
+        return pd.Series(transformed_dict)
     
-    def get_left_arm(self):
-        return {
-            "left_shoulder": self.left_shoulder,
-            "left_elbow": self.left_elbow,
-            "left_wrist": self.left_wrist
-        }
-    
-    def get_right_arm(self):
-        return {
-            "right_shoulder": self.right_shoulder,
-            "right_elbow": self.right_elbow,
-            "right_wrist": self.right_wrist
-        }
-    
-    def get_left_leg(self):
-        return {
-            "left_hip": self.left_hip,
-            "left_knee": self.left_knee,
-            "left_ankle": self.left_ankle
-        }
-    
-    def get_right_leg(self):
-        return {
-            "right_hip": self.right_hip,
-            "right_knee": self.right_knee,
-            "right_ankle": self.right_ankle
-        }
-    
-    def to_list(self):
-        return [
-            self.nose, self.left_eye, self.right_eye, self.left_ear, self.right_ear,
-            self.left_shoulder, self.right_shoulder, self.left_elbow, self.right_elbow,
-            self.left_wrist, self.right_wrist, self.left_hip, self.right_hip,
-            self.left_knee, self.right_knee, self.left_ankle, self.right_ankle
-        ]
-    
-    def to_dict(self):
-        keys = {}
-        for var_name, var_value in vars(self).items():
-            keys[var_name + "_X"] = var_value[0]
-            keys[var_name + "_Y"] = var_value[1]
-        return keys
+    @classmethod
+    def from_series(cls, series, image=None):
+        joints = {}
+        for key in series.index:
+            if key.endswith('_X'):
+                joint_name = key[:-2]
+                x = series[key]
+                y = series.get(f"{joint_name}_Y", None)
+                joints[joint_name] = [x, y]
+        return cls(joints=joints, image=image)
+
+
+def _standartize(joint):
+    return joint if joint != [0, 0] else [np.nan, np.nan]
+
+        
+if __name__ == "__main__":
+    joints_list = [
+        [0, 0], [3, 4], [5, 6], [7, 8], [0, 0], [11, 12], [13, 14], [15, 16], [17, 18],
+        [19, 20], [21, 22], [23, 24], [25, 26], [27, 28], [29, 30], [31, 32], [33, 34]
+    ]
+    skeleton = Skeleton(joints_list, image="image.jpg")
+    print(skeleton)
+
+    series = skeleton.to_series()
+    print("Series:")
+    print(series)
+
+    new_skeleton = Skeleton.from_series(series)
+    print("New Skeleton joints:")
+    print(new_skeleton)
+

@@ -2,12 +2,17 @@
 
 import os
 
-from tools.structures import Keypoints
+from tools.structures import Skeleton
 from ultralytics import YOLO
 
 
 def _empty_keypoints(count=17):
         return [[0, 0]] * count
+
+
+""" 
+Detector should use multiple detection models to detect poses in images combined.
+"""
 
 
 class Detector:
@@ -24,6 +29,6 @@ class Detector:
         keypoints = results.keypoints.xy.numpy().tolist()[0]
 
         if keypoints != []:
-            return Keypoints(keypoints=keypoints)
+            return Skeleton(joints=keypoints, image=file_path)
         else:
-            return Keypoints(keypoints=_empty_keypoints())
+            return Skeleton(joints=_empty_keypoints())

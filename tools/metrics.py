@@ -5,7 +5,7 @@ import numpy as np
 import os
 import pandas as pd
 
-from tools.structures import Keypoints, Segment
+from tools.structures import Skeleton, Segment
 
 
 CORE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -21,23 +21,33 @@ Emotions = {
 }
 
 
-def label_probabilities(df: pd.DataFrame, labels_column: str="Labels", preserve: bool=False) -> pd.DataFrame:
+def label_probabilities(df: pd.DataFrame, labels_column: str="Labels", preserve: bool=False) -> list[float]:
     """
-    This function calculates the probabilities of each label in the given DataFrame.
+    Calculate the probabilities of each emotion label in the given DataFrame.
 
     Args:
-        df (pandas.DataFrame): The input DataFrame which contains the labels.
-        labels_column (str, optional): The name of the column in the DataFrame that contains the labels. Defaults to "Labels".
-        preserve (bool, optional): If set to True, the original labels column is preserved in the returned DataFrame. If False, the labels column is dropped. Defaults to False.
+        df (pandas.DataFrame): The input DataFrame.
+        labels_column (str, optional): The name of the column containing the emotion labels. Defaults to "Labels".
+        preserve (bool, optional): Whether to preserve empty labels in the calculation. Defaults to False.
 
     Returns:
-        pandas.DataFrame: A DataFrame with the same rows as the input, but with additional columns for each label. Each new column contains the probability of that label for the corresponding row in the input DataFrame. The probabilities are rounded to 2 decimal places.
+        list: A list of probabilities for each emotion label.
+
+    This function iterates over the rows of the DataFrame and calculates the probabilities of each emotion label.
+    It first converts the string representation of the labels into a nested list using `ast.literal_eval`.
+    If `preserve` is False, it removes empty labels from the nested list using the `_remove_empty` function.
+    It then initializes an array of zeros with the length of the `Emotions` dictionary.
+    For each non-empty label in the nested list, it increments the corresponding index in the probability array.
+    Finally, it appends the probability array to the list of probabilities.
+
+    The function returns the list of probabilities rounded to two decimal places.
     """
     probs = []
 
     for _, row in df.iterrows():
         nested_list = ast.literal_eval(row[labels_column])
-        nested_list = _remove_empty(nested_list)
+        if not preserve:
+            nested_list = _remove_empty(nested_list)
         prob_single = np.zeros(len(Emotions))
         n_label_size = _real_size(nested_list)
         for label in nested_list:
@@ -45,13 +55,7 @@ def label_probabilities(df: pd.DataFrame, labels_column: str="Labels", preserve:
                 prob_single[Emotions[label[0]]] += 1 / n_label_size
         probs.append(prob_single)
 
-    probs = np.round(probs, 2)
-    probs_df = pd.DataFrame(probs, columns=list(Emotions.keys()))
-
-    if not preserve:
-        df = df.drop(columns=[labels_column])
-
-    return pd.concat([df, probs_df], ignore_index=False, axis=1)
+    return np.round(probs, 2)
 
 
 def segmentate(df: pd.DataFrame) -> list[Segment]:
@@ -76,10 +80,10 @@ def segmentate(df: pd.DataFrame) -> list[Segment]:
     start_i = 0
     num = 0
 
-    columns_to_drop = ["X", "Y", "Width", "Height"]
-    for column in columns_to_drop:
-        if column in df.columns:
-            df = df.drop(columns=column)
+    # columns_to_drop = ["X", "Y", "Width", "Height"]
+    # for column in columns_to_drop:
+    #     if column in df.columns:
+    #         df = df.drop(columns=column)
 
     for index, row in df.iterrows():
         if base == (None, None, None):
@@ -97,7 +101,7 @@ def segmentate(df: pd.DataFrame) -> list[Segment]:
     return segments
 
 
-def normalize_segment(segment: Segment, target_size: int=10, after: str="Anger") -> Segment:
+def normalize_segment(segment: Segment, target_size: int=10) -> Segment:
     """
     This function normalizes the length of a segment to a target size by either removing or duplicating rows.
 
@@ -118,7 +122,7 @@ def normalize_segment(segment: Segment, target_size: int=10, after: str="Anger")
 
     Finally, it returns a new Segment with the normalized DataFrame.
     """
-    df = remove_empty_keypoints(segment.df, after).reset_index(drop=True)
+    df = segment.df.reset_index(drop=True)
     start, end = 0, len(df)-1
     length = end - start + 1
     rows_inserted = 0
@@ -140,7 +144,7 @@ def normalize_segment(segment: Segment, target_size: int=10, after: str="Anger")
     return Segment(df)
 
 
-def normalize_skeleton(keypoints: Keypoints, box: tuple[float, float, float, float]) -> Keypoints:
+def normalize_skeleton(skeleton: Skeleton, box: tuple[float, float, float, float]) -> Skeleton:
     """
     This function normalizes the keypoints based on the bounding box.
 
@@ -162,37 +166,21 @@ def normalize_skeleton(keypoints: Keypoints, box: tuple[float, float, float, flo
     Finally, it returns a new Keypoints object with the normalized keypoints and the same image as the input keypoints.
     """
     x, y, w, h = box
-    kl = keypoints.to_list()
-    norm_keypoints = []
+    joints = skeleton.joints
+    norm_skeleton = []
+
+    
 
     for k in kl:
         if k != [0, 0]:
             k = np.array(k)
             k[0] = (k[0] - x) / w
             k[1] = (k[1] - y) / h
-            norm_keypoints.append([k[0], k[1]])
+            norm_skeleton.append([k[0], k[1]])
         else:
-            norm_keypoints.append([0, 0])
+            norm_skeleton.append([0, 0])
     
-    return Keypoints(keypoints=norm_keypoints)
-
-
-def remove_empty_keypoints(df: pd.DataFrame, after: str="Anger") -> pd.DataFrame:
-    """
-    Remove rows from a DataFrame where all the keypoints columns after a specified column are empty.
-
-    Args:
-        df (pandas.DataFrame): The DataFrame to remove empty keypoints from.
-        after (str, optional): The column name after which to start checking for empty keypoints. Defaults to "Anger".
-
-    Returns:
-        pandas.DataFrame: The DataFrame with rows containing empty keypoints removed.
-    """
-    col_index = df.columns.get_loc(after)
-    keypoints_columns = df.columns[col_index + 1:]
-    df = df.dropna(subset=keypoints_columns, how="all")
-    
-    return df
+    return Skeleton(joints=norm_skeleton)
 
 
 def _get_redundant_indices(start: int, end: int, segment_pivots: list[int]) -> list[int]:
