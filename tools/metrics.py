@@ -169,14 +169,12 @@ def normalize_skeleton(skeleton: Skeleton, box: tuple[float, float, float, float
     joints = skeleton.joints
     norm_skeleton = []
 
-    
-
-    for k in kl:
-        if k != [0, 0]:
-            k = np.array(k)
-            k[0] = (k[0] - x) / w
-            k[1] = (k[1] - y) / h
-            norm_skeleton.append([k[0], k[1]])
+    for _, value in joints.items():
+        if value != [np.nan, np.nan]:
+            value = np.array(value)
+            value[0] = (value[0] - x) / w
+            value[1] = (value[1] - y) / h
+            norm_skeleton.append([value[0], value[1]])
         else:
             norm_skeleton.append([0, 0])
     
