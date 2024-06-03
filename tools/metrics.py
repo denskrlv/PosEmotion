@@ -1,6 +1,5 @@
 # !/usr/bin/env python3
 
-import ast
 import numpy as np
 import os
 import pandas as pd
@@ -9,53 +8,6 @@ from tools.structures import Skeleton, Segment
 
 
 CORE_DIR = os.path.dirname(os.path.dirname(__file__))
-
-Emotions = {
-    "Happy"     : 0,
-    "Sad"       : 1,
-    "Fear"      : 2,
-    "Neutral"   : 3,
-    "Surprise"  : 4,
-    "Disgust"   : 5,
-    "Anger"     : 6
-}
-
-
-def label_probabilities(df: pd.DataFrame, labels_column: str="Labels", preserve: bool=False) -> list[float]:
-    """
-    Calculate the probabilities of each emotion label in the given DataFrame.
-
-    Args:
-        df (pandas.DataFrame): The input DataFrame.
-        labels_column (str, optional): The name of the column containing the emotion labels. Defaults to "Labels".
-        preserve (bool, optional): Whether to preserve empty labels in the calculation. Defaults to False.
-
-    Returns:
-        list: A list of probabilities for each emotion label.
-
-    This function iterates over the rows of the DataFrame and calculates the probabilities of each emotion label.
-    It first converts the string representation of the labels into a nested list using `ast.literal_eval`.
-    If `preserve` is False, it removes empty labels from the nested list using the `_remove_empty` function.
-    It then initializes an array of zeros with the length of the `Emotions` dictionary.
-    For each non-empty label in the nested list, it increments the corresponding index in the probability array.
-    Finally, it appends the probability array to the list of probabilities.
-
-    The function returns the list of probabilities rounded to two decimal places.
-    """
-    probs = []
-
-    for _, row in df.iterrows():
-        nested_list = ast.literal_eval(row[labels_column])
-        if not preserve:
-            nested_list = _remove_empty(nested_list)
-        prob_single = np.zeros(len(Emotions))
-        n_label_size = _real_size(nested_list)
-        for label in nested_list:
-            if label != [""]:
-                prob_single[Emotions[label[0]]] += 1 / n_label_size
-        probs.append(prob_single)
-
-    return np.round(probs, 2)
 
 
 def segmentate(df: pd.DataFrame) -> list[Segment]:
@@ -212,38 +164,3 @@ def _get_duplicate_indices(array: list[int]) -> list[int]:
         else:
             duplicates.add(elem)
     return result
-
-
-def _remove_empty(array: list) -> list:
-    """
-    Removes empty elements from the given array.
-
-    Args:
-        array (list): The input array.
-
-    Returns:
-        list: The array with empty elements removed.
-    """
-    for i in range(len(array)):
-        if array[i] == "No annotation":
-            array[i] = [""]
-    
-    return array
-
-
-def _real_size(array: list) -> int:
-    """
-    Calculates the number of non-empty labels in the given array.
-
-    Parameters:
-    array (list): The array containing labels.
-
-    Returns:
-    int: The count of non-empty labels in the array.
-    """
-    count = 0
-    for label in array:
-        if label != [""]:
-            count += 1
-    
-    return count

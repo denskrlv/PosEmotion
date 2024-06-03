@@ -1,15 +1,12 @@
 # !/usr/bin/env python3
 
 import cv2
-import matplotlib.pyplot as plt
 import os
 import mediapipe as mp
 import numpy as np
 import tensorflow as tf
 import tensorflow_hub as hub
 
-from mediapipe.tasks import python
-from mediapipe.tasks.python import vision
 from tools.structures import Skeleton
 from ultralytics import YOLO
 
