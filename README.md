@@ -1,6 +1,6 @@
 # PosEmotion
 
-![](https://github.com/PosEmotion/media/LOGO.gif)
+![](https://github.com/denskrlv/PosEmotion/blob/main/media/LOGO.gif)
 
 Abstract
 
