@@ -80,11 +80,6 @@ def segmentate(df: pd.DataFrame) -> list[Segment]:
     start_i = 0
     num = 0
 
-    # columns_to_drop = ["X", "Y", "Width", "Height"]
-    # for column in columns_to_drop:
-    #     if column in df.columns:
-    #         df = df.drop(columns=column)
-
     for index, row in df.iterrows():
         if base == (None, None, None):
             base = (row['Video Tag'], row['Clip Id'], row['Person Id'])

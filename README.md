@@ -1,6 +1,6 @@
 # PosEmotion
 
-Logo
+GIF
 
 Abstract
 
@@ -35,16 +35,15 @@ For this project EiLA (Latin-American) dataset was used. The data should have th
 
 ## Pre-trained Models
 These pre-trained models were used:
-|Model|Size (pixels)|Params (M)|Keypoints|
+|Model|Input size (pixels)|Params (M)|Keypoints|
 |:----|:-----------:|:--------:|:-------:|
-|[YOLOv8x-pose-p6](https://github.com/ultralytics/assets/releases/download/v8.2.0/yolov8x-pose-p6.pt)|1280|99.1|17|
-|Pose-ResNet18-Body|256|15|17(?)|
+|[YOLOv8x-pose-p6](https://docs.ultralytics.com/tasks/pose/)|1280|99.1|17|
+|[PoseLandmarker](https://ai.google.dev/edge/api/mediapipe/java/com/google/mediapipe/tasks/vision/poselandmarker/PoseLandmarker)|?|?|32|
+|[MoveNet](https://www.tensorflow.org/hub/tutorials/movenet)|192|?|17|
 
 ## Demo
 To see the demo, open and run the <code>posemotion.ipynb</code> file.
 
 ## Results
-
-## BibTex
 
 ## Acknowledgement

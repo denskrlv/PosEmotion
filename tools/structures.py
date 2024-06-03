@@ -1,6 +1,5 @@
 # !/usr/bin/env python3
 
-import os
 import numpy as np
 import pandas as pd
 
@@ -18,8 +17,6 @@ class Segment:
 
 
 class Skeleton:
-
-    CORE_DIR = os.path.dirname(os.path.dirname(__file__))
 
     def __init__(self, joints, image: str=None):
         if isinstance(joints, dict):
@@ -55,24 +52,34 @@ class Skeleton:
     
     def to_dict(self, joints):
         return {
-            "nose": _standartize(joints[0]),
-            "left_eye": _standartize(joints[1]),
-            "right_eye": _standartize(joints[2]),
-            "left_ear": _standartize(joints[3]),
-            "right_ear": _standartize(joints[4]),
-            "left_shoulder": _standartize(joints[5]),
-            "right_shoulder": _standartize(joints[6]),
-            "left_elbow": _standartize(joints[7]),
-            "right_elbow": _standartize(joints[8]),
-            "left_wrist": _standartize(joints[9]),
-            "right_wrist": _standartize(joints[10]),
-            "left_hip": _standartize(joints[11]),
-            "right_hip": _standartize(joints[12]),
-            "left_knee": _standartize(joints[13]),
-            "right_knee": _standartize(joints[14]),
-            "left_ankle": _standartize(joints[15]),
-            "right_ankle": _standartize(joints[16])
+            "nose": _standardize(joints[0]),
+            "left_eye": _standardize(joints[1]),
+            "right_eye": _standardize(joints[2]),
+            "left_ear": _standardize(joints[3]),
+            "right_ear": _standardize(joints[4]),
+            "left_shoulder": _standardize(joints[5]),
+            "right_shoulder": _standardize(joints[6]),
+            "left_elbow": _standardize(joints[7]),
+            "right_elbow": _standardize(joints[8]),
+            "left_wrist": _standardize(joints[9]),
+            "right_wrist": _standardize(joints[10]),
+            "left_hip": _standardize(joints[11]),
+            "right_hip": _standardize(joints[12]),
+            "left_knee": _standardize(joints[13]),
+            "right_knee": _standardize(joints[14]),
+            "left_ankle": _standardize(joints[15]),
+            "right_ankle": _standardize(joints[16])
         }
+    
+    def to_list(self):
+        return [
+            self.joints["nose"], self.joints["left_eye"], self.joints["right_eye"],
+            self.joints["left_ear"], self.joints["right_ear"], self.joints["left_shoulder"],
+            self.joints["right_shoulder"], self.joints["left_elbow"], self.joints["right_elbow"],
+            self.joints["left_wrist"], self.joints["right_wrist"], self.joints["left_hip"],
+            self.joints["right_hip"], self.joints["left_knee"], self.joints["right_knee"],
+            self.joints["left_ankle"], self.joints["right_ankle"]
+        ]
     
     def to_series(self):
         transformed_dict = {}
@@ -93,23 +100,5 @@ class Skeleton:
         return cls(joints=joints, image=image)
 
 
-def _standartize(joint):
+def _standardize(joint):
     return joint if joint != [0, 0] else [np.nan, np.nan]
-
-        
-if __name__ == "__main__":
-    joints_list = [
-        [0, 0], [3, 4], [5, 6], [7, 8], [0, 0], [11, 12], [13, 14], [15, 16], [17, 18],
-        [19, 20], [21, 22], [23, 24], [25, 26], [27, 28], [29, 30], [31, 32], [33, 34]
-    ]
-    skeleton = Skeleton(joints_list, image="image.jpg")
-    print(skeleton)
-
-    series = skeleton.to_series()
-    print("Series:")
-    print(series)
-
-    new_skeleton = Skeleton.from_series(series)
-    print("New Skeleton joints:")
-    print(new_skeleton)
-
