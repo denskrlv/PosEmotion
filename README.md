@@ -35,11 +35,11 @@ For this project EiLA (Latin-American) dataset was used. The data should have th
 
 ## Pre-trained Models
 These pre-trained models were used:
-|Model|Input size (pixels)|Params (M)|Keypoints|
-|:----|:-----------:|:--------:|:-------:|
-|[YOLOv8x-pose-p6](https://docs.ultralytics.com/tasks/pose/)|1280|99.1|17|
-|[PoseLandmarker](https://ai.google.dev/edge/api/mediapipe/java/com/google/mediapipe/tasks/vision/poselandmarker/PoseLandmarker)|?|?|32|
-|[MoveNet](https://www.tensorflow.org/hub/tutorials/movenet)|192|?|17|
+|Model|Input size (pixels)|Keypoints|
+|:----|:-----------:|:-------:|
+|[YOLOv8x-pose-p6](https://docs.ultralytics.com/tasks/pose/)|1280|17|
+|[PoseLandmarker](https://ai.google.dev/edge/api/mediapipe/java/com/google/mediapipe/tasks/vision/poselandmarker/PoseLandmarker)|256|32|
+|[MoveNet](https://www.tensorflow.org/hub/tutorials/movenet)|192|17|
 
 ## Demo
 To see the demo, open and run the <code>posemotion.ipynb</code> file.
