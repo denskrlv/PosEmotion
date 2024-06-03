@@ -55,6 +55,32 @@ class Segment:
         coordinates = self.df[pair].values
 
         return rdp(coordinates, epsilon=epsilon)
+    
+    def get_features(self):
+        features = {}
+        hp_x, hp_y = self.avg_head_position()
+        (lh_x, lh_y), (rh_x, rh_y) = self.avg_hands_position()
+        # emotions = self.count_emotions()
+
+        # features["Label"] = max(emotions, key=emotions.get)
+        features["Torso Angle"] = self.avg_torso_angle()
+        features["Head Position X"] = hp_x
+        features["Head Position Y"] = hp_y
+        features["Head Tilt"] = self.avg_head_tilt()
+        features["Left Hand Position X"] = lh_x
+        features["Left Hand Position Y"] = lh_y
+        features["Right Hand Position X"] = rh_x
+        features["Right Hand Position Y"] = rh_y
+        features["Left Wrist Distance to Body"], features["Right Wrist Distance to Body"] = self.avg_dist_to_body()
+        features["Shoulder Symmetry"], features["Hip Symmetry"] = self.avg_posture_symmetry()
+        features["Left Hand Velocity"] = self.avg_velocity(["left_wrist_X", "left_wrist_Y"])
+        features["Right Hand Velocity"] = self.avg_velocity(["right_wrist_X", "right_wrist_Y"])
+        features["Left Hand Acceleration"] = self.avg_acceleration(["left_wrist_X", "left_wrist_Y"])
+        features["Right Hand Acceleration"] = self.avg_acceleration(["right_wrist_X", "right_wrist_Y"])
+        features["Left Hand Jerk"] = self.avg_jerk(["left_wrist_X", "left_wrist_Y"])
+        features["Right Hand Jerk"] = self.avg_jerk(["right_wrist_X", "right_wrist_Y"])
+
+        return pd.Series(features)
 
     def count_emotions(self):
         base_emotions = ["Happy", "Sad", "Fear", "Surprise", "Disgust", "Anger", "Neutral"]
@@ -130,7 +156,11 @@ class Segment:
         frame_numbers = self.df["Frame Number"].values
 
         dist = np.linalg.norm(coodinates[1:] - coodinates[:-1], axis=1)
-        time = (frame_numbers[0] - frame_numbers[-1]) / fps
+
+        if frame_numbers[0] - frame_numbers[-1] == 0:
+            time = 1 / fps
+        else:
+            time = (frame_numbers[0] - frame_numbers[-1]) / fps
 
         return abs(np.sum(dist) / time)
     
@@ -139,7 +169,10 @@ class Segment:
         frame_numbers = self.df["Frame Number"].values
 
         dist = np.linalg.norm(coodinates[1:] - coodinates[:-1], axis=1)
-        time = (frame_numbers[0] - frame_numbers[-1]) / fps
+        if frame_numbers[0] - frame_numbers[-1] == 0:
+            time = 1 / fps
+        else:
+            time = (frame_numbers[0] - frame_numbers[-1]) / fps
         velocity = abs(np.sum(dist) / time)
 
         return velocity / time
@@ -149,7 +182,10 @@ class Segment:
         frame_numbers = self.df["Frame Number"].values
 
         dist = np.linalg.norm(coodinates[1:] - coodinates[:-1], axis=1)
-        time = (frame_numbers[0] - frame_numbers[-1]) / fps
+        if frame_numbers[0] - frame_numbers[-1] == 0:
+            time = 1 / fps
+        else:
+            time = (frame_numbers[0] - frame_numbers[-1]) / fps
         velocity = abs(np.sum(dist) / time)
         acceleration = velocity / time
 
