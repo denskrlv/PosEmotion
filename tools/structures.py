@@ -21,22 +21,6 @@ def _standardize(joint):
     return joint if joint != [0, 0] else [np.nan, np.nan]
 
 
-# probs = []
-
-#     for _, row in df.iterrows():
-#         nested_list = ast.literal_eval(row[labels_column])
-#         if not preserve:
-#             nested_list = _remove_empty(nested_list)
-#         prob_single = np.zeros(len(Emotions))
-#         n_label_size = _real_size(nested_list)
-#         for label in nested_list:
-#             if label != [""]:
-#                 prob_single[Emotions[label[0]]] += 1 / n_label_size
-#         probs.append(prob_single)
-
-#     return np.round(probs, 2)
-
-
 class Segment:
 
     def __init__(self, df):
@@ -60,9 +44,9 @@ class Segment:
         features = {}
         hp_x, hp_y = self.avg_head_position()
         (lh_x, lh_y), (rh_x, rh_y) = self.avg_hands_position()
-        # emotions = self.count_emotions()
+        emotions = self.count_emotions()
 
-        # features["Label"] = max(emotions, key=emotions.get)
+        features["Label"] = max(emotions, key=emotions.get)
         features["Torso Angle"] = self.avg_torso_angle()
         features["Head Position X"] = hp_x
         features["Head Position Y"] = hp_y
