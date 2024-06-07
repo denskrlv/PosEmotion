@@ -50,15 +50,15 @@ def _add_lines(img, joints):
     ]
 
     for start, end in connections:
-        if start != [np.nan, np.nan] and end != [np.nan, np.nan]:
+        if not np.isnan(start).any() and not np.isnan(end).any():
             cv2.line(img, (int(start[0]), int(start[1])), (int(end[0]), int(end[1])), (255, 0, 0), 2)
 
     for _, var_value in joints.items():
-        if var_value != [np.nan, np.nan]:
+        if not np.isnan(var_value).any():
             cv2.circle(img, (int(var_value[0]), int(var_value[1])), 5, (0, 255, 0), -1)
 
 def _add_labels(img, joints):
     for var_name, var_value in joints.items():
-        if var_value != [np.nan, np.nan]:
+        if not np.isnan(var_value).any():
             cv2.putText(img, str(var_name), (int(var_value[0]), int(var_value[1])),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)

@@ -243,6 +243,9 @@ class Skeleton:
             f"\nRight Ankle: {self.joints['right_ankle']}"
         )
     
+    def __len__(self):
+        return len(self.joints)
+    
     def to_dict(self, joints):
         return {
             "nose": _standardize(joints[0]),
