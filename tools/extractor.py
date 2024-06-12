@@ -1,6 +1,7 @@
 # !/usr/bin/env python3
 
 import cv2
+import glob
 import os
 import numpy as np
 import pandas as pd
@@ -15,6 +16,39 @@ class Extractor:
         self.extract_from = os.path.join(self.CORE_DIR, extract_from)
         self.extract_to = os.path.join(self.CORE_DIR, extract_to)
 
+    def flip_frames(self, target, axis=0):
+        target = os.path.join(self.CORE_DIR, target)
+
+        if not os.path.exists(self.extract_to):
+            raise Exception("Error: Extracted frames not found.")
+        
+        if not os.path.exists(target):
+            os.makedirs(target)
+
+        jpg_files = glob.glob(os.path.join(self.extract_to, "*.jpg"))
+
+        for file_path in jpg_files:
+            frame = cv2.imread(file_path)
+            frame = cv2.flip(frame, axis)
+            cv2.imwrite(os.path.join(target, os.path.basename(file_path)), frame)
+
+    def random_rotate_frames(self, target, minr=30, maxr=330):
+        target = os.path.join(self.CORE_DIR, target)
+
+        if not os.path.exists(self.extract_to):
+            raise Exception("Error: Extracted frames not found.")
+        
+        if not os.path.exists(target):
+            os.makedirs(target)
+
+        jpg_files = glob.glob(os.path.join(self.extract_to, "*.jpg"))
+
+        for file_path in jpg_files:
+            frame = cv2.imread(file_path)
+            angle = np.random.randint(minr, maxr)
+            frame = self._rotate_frame(frame, angle)
+            cv2.imwrite(os.path.join(target, os.path.basename(file_path)), frame)
+
     def extract_frames(self):
         if not os.path.exists(self.extract_to):
             os.makedirs(self.extract_to)
@@ -24,11 +58,11 @@ class Extractor:
         progress = 0
         total = len(df)
         for index, row in df.iterrows():
-            video_tag, clip_id, label, frame_no = row['Video Tag'], row['Clip Id'], row['Labels'], row['Frame Number']
-            x, y, w, h, person_id = row['X'], row['Y'], row['Width'], row['Height'], row['Person Id']
+            video_tag, frame_no = row['Video Tag'], row['Frame Number']
+            x, y, w, h = row['X'], row['Y'], row['Width'], row['Height']
 
-            frame = self._extract_frame(os.path.join(self.extract_from, video_tag + ".mp4"), frame_no, x, y, w, h)
-            cv2.imwrite(os.path.join(self.extract_to, video_tag + "_" + str(index) + ".jpg"), frame)
+            frame = self._extract_frame(os.path.join(self.extract_from, f"{video_tag}.mp4"), frame_no, x, y, w, h)
+            cv2.imwrite(os.path.join(self.extract_to, f"{video_tag}_{index}.jpg"), frame)
             progress += 1
             print("Progress: {}/{}".format(progress, total))
 
@@ -43,14 +77,19 @@ class Extractor:
         height = int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
         width = int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))
 
-        x = int((float(x)/100) * width)
-        y = int((float(y)/100) * height)
-        w = int((float(w)/100) * width)
-        h = int((float(h)/100) * height)
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (128,128,128), 2)
-        frame = self._mask_frame(frame, x, y, w, h)
+        x = int((float(x) / 100) * width)
+        y = int((float(y) / 100) * height)
+        w = int((float(w) / 100) * width)
+        h = int((float(h) / 100) * height)
 
-        return frame
+        return frame[y:y + h, x:x + w]
+    
+    def _rotate_frame(self, frame, angle):
+        height, width = frame.shape[:2]
+        center = (width // 2, height // 2)
+        rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
+
+        return cv2.warpAffine(frame, rotation_matrix, (width, height))
 
     def _mask_frame(self, frame, x, y, w, h):
         mask = np.zeros(frame.shape[:2], dtype="uint8")
