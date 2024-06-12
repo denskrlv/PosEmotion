@@ -4,6 +4,15 @@
 
 Abstract
 
+## Progress
+|Task|Status|
+|:---|:----:|
+|Added supervised learning (SVM)|<span style="color:lightgreen">DONE</span>|
+|Changing features type to vectors that represent movements and its lengths|<span style="color:yellow">IN PROGRESS</span>|
+|Switch to PoseLandmarker and compute 3D vectors (instead of 2D) with estimated depths|<span style="color:yellow">IN PROGRESS</span>|
+|Augment the data by rotating, flipping and adding noise to pictures||
+|Clean the code and add documentation||
+
 ## Contents
 
 ## Introduction
@@ -36,7 +45,7 @@ For this project EiLA (Latin-American) dataset was used. The data should have th
 ## Pre-trained Models
 These pre-trained models were used:
 |Model|Input size (pixels)|Keypoints|
-|:----|:-----------:|:-------:|
+|:----|:-----------------:|:-------:|
 |[YOLOv8x-pose-p6](https://docs.ultralytics.com/tasks/pose/)|1280|17|
 |[PoseLandmarker](https://ai.google.dev/edge/api/mediapipe/java/com/google/mediapipe/tasks/vision/poselandmarker/PoseLandmarker)|256|32|
 |[MoveNet](https://www.tensorflow.org/hub/tutorials/movenet)|192|17|
