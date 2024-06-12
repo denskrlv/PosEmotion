@@ -7,10 +7,10 @@ Abstract
 ## Progress
 |Task|Status|
 |:---|:----:|
-|Added supervised learning (SVM)|<span style="color:lightgreen">DONE</span>|
-|Changing features type to vectors that represent movements and its lengths|<span style="color:lightgreen">DONE</span>|
-|Switch to PoseLandmarker and compute 3D vectors (instead of 2D) with estimated depths|<span style="color:yellow">IN PROGRESS</span>|
-|Augment the data by rotating, flipping and adding noise to pictures|<span style="color:yellow">IN PROGRESS</span>|
+|Added supervised learning (SVM)|✅|
+|Changing features type to vectors that represent movements and its lengths|✅|
+|Switch to PoseLandmarker and compute 3D vectors (instead of 2D) with estimated depths|🟡|
+|Augment the data by rotating, flipping and adding noise to pictures|🟡|
 |Apply simplification curve while calculating vector features, ensuring consistency in vector sizes||
 |Clean the code and add documentation||
 
