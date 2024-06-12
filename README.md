@@ -13,6 +13,7 @@ Abstract
 |Augment the data by rotating and flipping the pictures|✅|
 |Apply simplification curve while calculating vector features, ensuring consistency in vector sizes||
 |Add demographics data to the feature vectors||
+|Add demographics data to the feature vectors||
 |Clean the code and add documentation||
 
 ## Contents
