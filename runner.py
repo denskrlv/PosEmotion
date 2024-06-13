@@ -15,6 +15,6 @@ if __name__ == '__main__':
     # Uncomment lines below to apply MoveNet detector to the frames
     apply_plm(
         df,
-        "assets/frames",
-        "assets/annotations/keypoints_plm.csv"
+        "assets/frames_rotated",
+        "assets/annotations/keypoints_plm_rotated.csv"
     )

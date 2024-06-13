@@ -72,13 +72,16 @@ class Segment:
         features = {}
         coordinates = self.df[[f"{pair}_X", f"{pair}_Y"]].values
 
-        # simplified_coordinates = rdp(coordinates, epsilon=epsilon)  # simplify curve
+        r_hip = self.df[[f"right_hip_X", f"right_hip_Y"]].values
+        l_hip = self.df[[f"left_hip_X", f"left_hip_Y"]].values
+        hip_middle = (r_hip + l_hip) / 2
 
         for i in range(1, len(coordinates)):
             v = coordinates[i] - coordinates[i - 1]
-            features[f"Magnitude_{pair}_{i}"] = np.linalg.norm(v)
+            features[f"Distance_Hip_{pair}_{i}"] = np.linalg.norm(coordinates[i] - hip_middle)
             features[f"Direction_{pair}_{i}"] = np.arctan2(v[1], v[0])
-            features[f"Slope_{pair}_{i}"] = v[1] / v[0] if v[0] != 0 else 0  # np.inf won't work with clustering
+            features[f"Speed_{pair}_{i}"] = np.linalg.norm(v)
+            # features[f"Angle_Hip_{pair}_{i}"] = np.arctan2(coordinates[i][1] - hip_middle[0][1], coordinates[i][0] - hip_middle[0][0])
 
         return features
 
