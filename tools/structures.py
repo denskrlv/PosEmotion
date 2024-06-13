@@ -77,11 +77,7 @@ class Segment:
         hip_middle = (r_hip + l_hip) / 2
 
         for i in range(1, len(coordinates)):
-            v = coordinates[i] - coordinates[i - 1]
             features[f"Distance_Hip_{pair}_{i}"] = np.linalg.norm(coordinates[i] - hip_middle)
-            features[f"Direction_{pair}_{i}"] = np.arctan2(v[1], v[0])
-            features[f"Speed_{pair}_{i}"] = np.linalg.norm(v)
-            # features[f"Angle_Hip_{pair}_{i}"] = np.arctan2(coordinates[i][1] - hip_middle[0][1], coordinates[i][0] - hip_middle[0][0])
 
         return features
 
