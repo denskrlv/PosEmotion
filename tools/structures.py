@@ -84,11 +84,12 @@ class Segment:
 
 class Skeleton:
 
-    def __init__(self, joints, image: str=None):
+    def __init__(self, joints, depths=[], image: str=None):
         if isinstance(joints, dict):
-            self.joints = joints
+            self.joints = {key: value + [depths[i] if i < len(depths) else 0] for i, (key, value) in enumerate(joints.items())}
         elif isinstance(joints, list):
             self.joints = self.to_dict(joints)
+            self.joints = {key: value + [depths[i] if i < len(depths) else 0] for i, (key, value) in enumerate(self.joints.items())}
         else:
             raise TypeError("joints must be a list or a dictionary")
         self.image = image
