@@ -10,44 +10,6 @@ from tools.structures import Skeleton, Segment
 CORE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
-def calculate_rotation_angle(x, z):
-    """
-    Calculate the angle required to rotate a point (x, z) around the y-axis to make the z-coordinate zero.
-    """
-    if z == 0:
-        return 0
-    return np.arctan2(z, x)
-
-
-def align_skeleton(skeleton: Skeleton, depths: list[int]) -> Skeleton:
-    if len(skeleton) != len(depths):
-        raise ValueError("The number of keypoints and the number of depths must be the same.")
-    
-    base_skeleton = skeleton.to_list()
-    depths = [d * 1000 for d in depths]
-    skeleton_3d = [[x, y, z] for (x, y), z in zip(base_skeleton, depths)]
-
-    l_hip = skeleton_3d[11]
-    # r_hip = skeleton_3d[12]
-    # m_hip = [(l + r) / 2 for l, r in zip(l_hip, r_hip)]
-    # m_hip_depth = (depths[11] + depths[12]) / 2
-
-    rotation_angle = calculate_rotation_angle(l_hip[0], depths[11])
-    cos_theta = np.cos(rotation_angle)
-    sin_theta = np.sin(rotation_angle)
-
-    R = np.array([
-        [cos_theta, 0, sin_theta],
-        [0, 1, 0],
-        [-sin_theta, 0, cos_theta]
-    ])
-
-    rotated_skeleton_3d = np.dot(skeleton_3d, R.T)
-    skeleton_2d = [[x, y] for x, y, _ in rotated_skeleton_3d]
-
-    return Skeleton(joints=skeleton_2d, image=skeleton.image)
-
-
 def segmentate(df: pd.DataFrame) -> list[Segment]:
     """
     This function segments the input DataFrame into different segments based on changes in 'Video Tag', 'Clip Id', and 'Person Id'.

@@ -12,8 +12,9 @@ Abstract
 |Changing features type to vectors that represent movements and its lengths|✅|
 |Augment the data by rotating and flipping the pictures|✅|
 |"Cut" overrepresented classes, so the number of samples will be equal|✅|
-|Switch to PoseLandmarker and compute 3D vectors (instead of 2D) with estimated depths|🟡|
-|Add demographics data to the feature vectors|🟡|
+|Switch to PoseLandmarker and compute 3D vectors (instead of 2D) with estimated depths|✅|
+|Add demographics data to the feature vectors|❌|
+|Add different graphical data|🟡|
 |Apply simplification curve while calculating vector features, ensuring consistency in vector sizes||
 |Clean the code and add documentation||
 

@@ -18,7 +18,7 @@ def find_column_pairs(columns):
 
 
 def _standardize(joint):
-    return joint if joint != [0, 0] else [np.nan, np.nan]
+    return joint if joint != [0, 0, 0] else [np.nan, np.nan, 0]
 
 
 class Segment:
@@ -70,10 +70,10 @@ class Segment:
     
     def vector_features(self, pair):
         features = {}
-        coordinates = self.df[[f"{pair}_X", f"{pair}_Y"]].values
+        coordinates = self.df[[f"{pair}_X", f"{pair}_Y", f"{pair}_Z"]].values
 
-        r_hip = self.df[[f"right_hip_X", f"right_hip_Y"]].values
-        l_hip = self.df[[f"left_hip_X", f"left_hip_Y"]].values
+        r_hip = self.df[[f"right_hip_X", f"right_hip_Y", f"right_hip_Z"]].values
+        l_hip = self.df[[f"left_hip_X", f"left_hip_Y", f"left_hip_Z"]].values
         hip_middle = (r_hip + l_hip) / 2
 
         for i in range(1, len(coordinates)):
@@ -84,12 +84,11 @@ class Segment:
 
 class Skeleton:
 
-    def __init__(self, joints, depths=[], image: str=None):
+    def __init__(self, joints, image: str=None):
         if isinstance(joints, dict):
-            self.joints = {key: value + [depths[i] if i < len(depths) else 0] for i, (key, value) in enumerate(joints.items())}
+            self.joints = self.joints
         elif isinstance(joints, list):
             self.joints = self.to_dict(joints)
-            self.joints = {key: value + [depths[i] if i < len(depths) else 0] for i, (key, value) in enumerate(self.joints.items())}
         else:
             raise TypeError("joints must be a list or a dictionary")
         self.image = image
@@ -141,8 +140,8 @@ class Skeleton:
             "right_ankle": _standardize(joints[16])
         }
     
-    def to_list(self):
-        return [
+    def to_ndarray(self):
+        joints_list = [
             self.joints["nose"], self.joints["left_eye"], self.joints["right_eye"],
             self.joints["left_ear"], self.joints["right_ear"], self.joints["left_shoulder"],
             self.joints["right_shoulder"], self.joints["left_elbow"], self.joints["right_elbow"],
@@ -150,14 +149,18 @@ class Skeleton:
             self.joints["right_hip"], self.joints["left_knee"], self.joints["right_knee"],
             self.joints["left_ankle"], self.joints["right_ankle"]
         ]
+
+        return np.array(joints_list)
     
     def to_series(self):
         transformed_dict = {}
         for key, value in self.joints.items():
             transformed_dict[f"{key}_X"] = value[0]
             transformed_dict[f"{key}_Y"] = value[1]
+            transformed_dict[f"{key}_Z"] = value[2]
         return pd.Series(transformed_dict)
     
+    @DeprecationWarning
     @classmethod
     def from_series(cls, series, image=None):
         joints = {}

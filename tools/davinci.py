@@ -11,10 +11,19 @@ def draw(skeleton, labels=False, lines=True, inline=False):
     try:
         img = cv2.imread(skeleton.image)
         img_name = os.path.basename(skeleton.image)
-        joints = skeleton.joints
+        joints = dict()
+        
+        original_joints = skeleton.joints
+        original_height, original_width, _ = img.shape
+
+        for key in original_joints:
+            x, y, _ = original_joints[key]
+            if not np.isnan(x) and not np.isnan(y):
+                joints[key] = [x * original_width, y * original_height]
+            else:
+                joints[key] = [np.nan, np.nan]
     except Exception as e:
-        print(f"Error: {e}")
-        return
+        raise Exception(f"Error: {e}")
     
     if labels:
         _add_labels(img, joints)

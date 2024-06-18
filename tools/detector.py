@@ -7,14 +7,42 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_hub as hub
 
+from tqdm import tqdm
 from tools.structures import Skeleton
 from ultralytics import YOLO
 
 
 CORE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+
 def _empty_keypoints(count=17):
-        return [[0, 0]] * count
+        return [[np.nan, np.nan, np.nan]] * count
+
+
+def _align_skeleton(skeleton: Skeleton) -> Skeleton:
+    joints = skeleton.to_ndarray()
+    l_hip = joints[11]
+    r_hip = joints[12]
+    m_hip = (l_hip + r_hip) / 2
+    
+    dx = r_hip[0] - l_hip[0]
+    dz = r_hip[2] - l_hip[2]
+
+    rotation_angle = np.arctan2(dz, dx)
+    cos_theta = np.cos(rotation_angle)
+    sin_theta = np.sin(rotation_angle)
+
+    R = np.array([
+            [cos_theta, 0.0, sin_theta],
+            [0.0, 1.0, 0.0],
+            [-sin_theta, 0.0, cos_theta]
+        ])
+
+    translated_joints = joints - m_hip
+    rotated_joints = np.dot(translated_joints, R.T) + m_hip
+    rotated_joints = rotated_joints.tolist()
+
+    return Skeleton(joints=rotated_joints, image=skeleton.image)
 
 
 class YoloDetector:
@@ -27,19 +55,28 @@ class YoloDetector:
 
         results = self.model(file_path)[0]
         keypoints = results.keypoints.xy.numpy().tolist()[0]
+        keypoints = [[x, y, 0] for x, y in keypoints]
+
+        norm_keypoints = []
+        original_height, original_width, _ = cv2.imread(file_path).shape
+
+        for keypoint in keypoints:
+            x, y, _ = keypoint
+            x = x / original_width
+            y = y / original_height
+            norm_keypoints.append([x, y, 0])
 
         if keypoints != []:
-            return Skeleton(joints=keypoints, image=file_path)
+            return Skeleton(joints=norm_keypoints, image=file_path)
         else:
             return Skeleton(joints=_empty_keypoints(), image=file_path)
         
     def detect_multi(self, df, frames_path):
         keypoints = []
 
-        for index, row in df.iterrows():
+        for index, row in tqdm(df.iterrows(), total=df.shape[0], desc="Detecting"):
             result = self.detect(f"{frames_path}/{row['Video Tag']}_{index}.jpg")
             keypoints.append(result.to_series())
-            print("Progress: {}/{}".format(index+1, len(df)))
         
         return keypoints
     
@@ -69,31 +106,18 @@ class MoveNetDetector:
             return Skeleton(joints=_empty_keypoints(), image=file_path)
         
         keypoints = [
-            [x, y] if confidence >= conf else [np.nan, np.nan]
+            [x, y, 0] if confidence >= conf else [np.nan, np.nan, 0]
             for y, x, confidence in keypoints
         ]
-
-        original_height, original_width, _ = image.shape
-        adjusted_keypoints = []
-
-        for keypoint in keypoints:
-            x, y = keypoint
-            if not np.isnan(x) and not np.isnan(y):
-                x *= original_width
-                y *= original_height
-                adjusted_keypoints.append([x, y])
-            else:
-                adjusted_keypoints.append([np.nan, np.nan])
         
-        return Skeleton(joints=adjusted_keypoints, image=file_path)
+        return Skeleton(joints=keypoints, image=file_path)
     
     def detect_multi(self, df, frames_path, conf=0.3):
         keypoints = []
 
-        for index, row in df.iterrows():
+        for index, row in tqdm(df.iterrows(), total=df.shape[0], desc="Detecting"):
             result = self.detect(f"{frames_path}/{row['Video Tag']}_{index}.jpg", conf)
             keypoints.append(result.to_series())
-            print("Progress: {}/{}".format(index+1, len(df)))
         
         return keypoints
 
@@ -111,50 +135,36 @@ class PoseLandmarkerDetector:
             running_mode = self.vision_running_mode.IMAGE
         )
 
-    def detect(self, file_path, conf=0.3):
+    def detect(self, file_path, conf=0.3, depth=True, align=False):
         keypoints = []
-        depths = []
 
         mp_image = mp.Image.create_from_file(os.path.join(CORE_DIR, file_path))
-        indices = [0, 2, 5, 7, 8, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28]
+        indices = [0, 2, 5, 7, 8, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28]  # 17 keypoints indices
 
         with self.pose_landmarker.create_from_options(self.options) as landmarker:
             results = landmarker.detect(mp_image)
             
             if results.pose_landmarks == []:
-                return Skeleton(joints=_empty_keypoints(), image=file_path), depths
+                return Skeleton(joints=_empty_keypoints(), image=file_path)
 
             results = results.pose_landmarks[0]
             results = [results[i] for i in indices]
             for r in results:
                 if r.visibility >= conf:
-                    keypoints.append([r.x, r.y])
-                    depths.append(r.z)
+                    keypoints.append([r.x, r.y, r.z]) if depth else keypoints.append([r.x, r.y, 0])
                 else:
-                    keypoints.append([np.nan, np.nan])
-                    depths.append(np.nan)
+                    keypoints.append([np.nan, np.nan, np.nan]) if depth else keypoints.append([np.nan, np.nan, 0])
 
-        original_height = mp_image.height
-        original_width = mp_image.width
-        adjusted_keypoints = []
-
-        for keypoint in keypoints:
-            x, y = keypoint
-            if not np.isnan(x) and not np.isnan(y):
-                x *= original_width
-                y *= original_height
-                adjusted_keypoints.append([x, y])
-            else:
-                adjusted_keypoints.append([np.nan, np.nan])
-        
-        return Skeleton(joints=adjusted_keypoints, image=file_path), depths
+        if align:
+            return _align_skeleton(Skeleton(joints=keypoints, image=file_path))
+        else:
+            return Skeleton(joints=keypoints, image=file_path)
     
-    def detect_multi(self, df, frames_path, conf=0.3):
+    def detect_multi(self, df, frames_path, conf=0.3, depth=True, align=False):
         keypoints = []
 
-        for index, row in df.iterrows():
-            result, _ = self.detect(f"{frames_path}/{row['Video Tag']}_{index}.jpg", conf)
+        for index, row in tqdm(df.iterrows(), total=df.shape[0], desc="Detecting"):
+            result = self.detect(f"{frames_path}/{row['Video Tag']}_{index}.jpg", conf, depth, align)
             keypoints.append(result.to_series())
-            print("Progress: {}/{}".format(index+1, len(df)))
         
         return keypoints
