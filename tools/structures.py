@@ -76,7 +76,7 @@ class Segment:
         l_hip = self.df[[f"left_hip_X", f"left_hip_Y", f"left_hip_Z"]].values
         hip_middle = (r_hip + l_hip) / 2
 
-        for i in range(1, len(coordinates)):
+        for i in range(len(coordinates)):
             features[f"Distance_Hip_{pair}_{i}"] = np.linalg.norm(coordinates[i] - hip_middle)
 
         return features
@@ -86,7 +86,7 @@ class Skeleton:
 
     def __init__(self, joints, image: str=None):
         if isinstance(joints, dict):
-            self.joints = self.joints
+            self.joints = joints
         elif isinstance(joints, list):
             self.joints = self.to_dict(joints)
         else:

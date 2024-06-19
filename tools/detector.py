@@ -20,27 +20,30 @@ def _empty_keypoints(count=17):
 
 
 def _align_skeleton(skeleton: Skeleton) -> Skeleton:
-    joints = skeleton.to_ndarray()
-    l_hip = joints[11]
-    r_hip = joints[12]
-    m_hip = (l_hip + r_hip) / 2
+    joints = skeleton.joints
+    l_hip = joints["left_hip"]
+    r_hip = joints["right_hip"]
     
-    dx = r_hip[0] - l_hip[0]
-    dz = r_hip[2] - l_hip[2]
+    v = np.array(l_hip) - np.array(r_hip)
+    u = np.cross(v, [1, 0, 0])
+    u = u / np.linalg.norm(u)
 
-    rotation_angle = np.arctan2(dz, dx)
-    cos_theta = np.cos(rotation_angle)
-    sin_theta = np.sin(rotation_angle)
+    cos_theta = v.dot([1, 0, 0]) / np.linalg.norm(v)
+    sin_theta = np.sqrt(1 - cos_theta**2)
+    
+    K = np.array([
+        [0, -u[2], u[1]],
+        [u[2], 0, -u[0]],
+        [-u[1], u[0], 0]
+    ])
 
-    R = np.array([
-            [cos_theta, 0.0, sin_theta],
-            [0.0, 1.0, 0.0],
-            [-sin_theta, 0.0, cos_theta]
-        ])
+    # Rodrigues' rotation formula
+    I = np.eye(3)
+    R = I + sin_theta * K + (1 - cos_theta) * np.dot(K, K)
 
-    translated_joints = joints - m_hip
-    rotated_joints = np.dot(translated_joints, R.T) + m_hip
-    rotated_joints = rotated_joints.tolist()
+    rotated_joints = {}
+    for key, point in joints.items():
+        rotated_joints[key] = np.dot(R, point)
 
     return Skeleton(joints=rotated_joints, image=skeleton.image)
 
