@@ -1,6 +1,6 @@
 # PosEmotion: Analyzing Human Poses for Emotion Recognition
 
-![](https://github.com/denskrlv/PosEmotion/blob/main/media/logo.gif)
+![](https://github.com/denskrlv/PosEmotion/blob/main/media/logo.png)
 
 Abstract
 
