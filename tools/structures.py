@@ -77,7 +77,7 @@ class Segment:
         hip_middle = (r_hip + l_hip) / 2
 
         for i in range(len(coordinates)):
-            features[f"Distance_Hip_{pair}_{i}"] = np.linalg.norm(coordinates[i] - hip_middle)
+            features[f"Distance_Hip_{pair}_{i}"] = np.linalg.norm(coordinates[i] - hip_middle[i])
 
         return features
 

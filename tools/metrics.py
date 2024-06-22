@@ -10,7 +10,7 @@ from tools.structures import Skeleton, Segment
 CORE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
-def segmentate(df: pd.DataFrame) -> list[Segment]:
+def segment(df: pd.DataFrame) -> list[Segment]:
     """
     This function segments the input DataFrame into different segments based on changes in 'Video Tag', 'Clip Id', and 'Person Id'.
 

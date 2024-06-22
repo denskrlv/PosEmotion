@@ -1,6 +1,6 @@
-# PosEmotion
+# PosEmotion: Analyzing Human Poses for Emotion Recognition
 
-![](https://github.com/denskrlv/PosEmotion/blob/main/media/LOGO.gif)
+![](https://github.com/denskrlv/PosEmotion/blob/main/media/logo.gif)
 
 Abstract
 
@@ -13,8 +13,7 @@ Abstract
 |Augment the data by rotating and flipping the pictures|✅|
 |"Cut" overrepresented classes, so the number of samples will be equal|✅|
 |Switch to PoseLandmarker and compute 3D vectors (instead of 2D) with estimated depths|✅|
-|Add demographics data to the feature vectors|❌|
-|Add different graphical data|🟡|
+|Add demographics data to the feature vectors||
 |Apply simplification curve while calculating vector features, ensuring consistency in vector sizes||
 |Clean the code and add documentation||
 
