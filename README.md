@@ -1,4 +1,4 @@
-# PosEmotion: Analyzing Human Poses for Emotion Recognition
+# PosEmotion: Emotion Recognition from Skeletal Movements
 
 ![](https://github.com/denskrlv/PosEmotion/blob/main/media/logo.png)
 
@@ -13,7 +13,8 @@ Abstract
 |Augment the data by rotating and flipping the pictures|✅|
 |"Cut" overrepresented classes, so the number of samples will be equal|✅|
 |Switch to PoseLandmarker and compute 3D vectors (instead of 2D) with estimated depths|✅|
-|Apply simplification curve while calculating vector features, ensuring consistency in vector sizes|🟡|
+|Add quaternion interpolation to skeletons|🟡|
+|Apply simplification curve while calculating vector features, ensuring consistency in vector sizes||
 |Clean the code and add documentation|🟡|
 
 ## Contents
