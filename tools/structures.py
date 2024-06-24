@@ -71,13 +71,13 @@ class Segment:
     def vector_features(self, pair):
         features = {}
         coordinates = self.df[[f"{pair}_X", f"{pair}_Y", f"{pair}_Z"]].values
+        other_pairs = find_column_pairs(self.get_column_names())
+        other_pairs.remove(pair)
 
-        r_hip = self.df[[f"right_hip_X", f"right_hip_Y", f"right_hip_Z"]].values
-        l_hip = self.df[[f"left_hip_X", f"left_hip_Y", f"left_hip_Z"]].values
-        hip_middle = (r_hip + l_hip) / 2
-
-        for i in range(len(coordinates)):
-            features[f"Distance_Hip_{pair}_{i}"] = np.linalg.norm(coordinates[i] - hip_middle[i])
+        for other_pair in other_pairs:
+            other_coordinates = self.df[[f"{other_pair}_X", f"{other_pair}_Y", f"{other_pair}_Z"]].values
+            for i in range(len(coordinates)):
+                features[f"d_{pair}_{other_pair}_{i}"] = np.linalg.norm(coordinates[i] - other_coordinates[i])
 
         return features
 
@@ -159,15 +159,42 @@ class Skeleton:
             transformed_dict[f"{key}_Y"] = value[1]
             transformed_dict[f"{key}_Z"] = value[2]
         return pd.Series(transformed_dict)
+
+
+class PLMSkeleton:
+    def __init__(self, joints, image: str=None):
+        if isinstance(joints, dict):
+            self.joints = joints
+        elif isinstance(joints, list):
+            self.joints = self.to_dict(joints)
+        else:
+            raise TypeError("joints must be a list or a dictionary")
+        self.image = image
     
-    @DeprecationWarning
-    @classmethod
-    def from_series(cls, series, image=None):
-        joints = {}
-        for key in series.index:
-            if key.endswith('_X'):
-                joint_name = key[:-2]
-                x = series[key]
-                y = series.get(f"{joint_name}_Y", None)
-                joints[joint_name] = [x, y]
-        return cls(joints=joints, image=image)
+    def __len__(self):
+        return len(self.joints)
+    
+    def to_dict(self, joints):
+        joint_names = [
+            "nose", "left_reye", "left_eye", "left_leye", "right_leye", "right_eye", "right_reye", 
+            "left_ear", "right_ear", "left_mouth", "right_mouth", "left_shoulder", "right_shoulder", 
+            "left_elbow", "right_elbow", "left_wrist", "right_wrist", "left_f1", "right_f1", 
+            "left_f2", "right_f2", "left_f3", "right_f3", "left_hip", "right_hip", "left_knee", 
+            "right_knee", "left_ankle", "right_ankle", "left_hiel", "right_hiel", "left_teen", "right_teen"
+        ]
+    
+        return {name: joints[i] for i, name in enumerate(joint_names)}
+
+    
+    def to_ndarray(self):
+        joints_list = [self.joints[f"point_{i}"] for i in range(33)]
+        return np.array(joints_list)
+    
+    def to_series(self):
+        transformed_dict = {}
+        for key, value in self.joints.items():
+            transformed_dict[f"{key}_X"] = value[0]
+            transformed_dict[f"{key}_Y"] = value[1]
+            transformed_dict[f"{key}_Z"] = value[2]
+        return pd.Series(transformed_dict)
+

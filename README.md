@@ -2,7 +2,7 @@
 
 ![](https://github.com/denskrlv/PosEmotion/blob/main/media/logo.gif)
 
-Abstract
+The accurate interpretation of emotions is crucial in enhancing various fields, such as assistive technologies and healthcare. People may mask their true emotions, as facial expressions are not always reliable indicators. This study explores the efficacy of using skeletal movements for emotion recognition. The research focuses on two primary questions: the effectiveness of clustering skeletal movements from the EiLA dataset into the seven basic emotions, and the accuracy of different models in predicting emotions based on these movements. The methodology involves extracting frames from video data and using the PoseLandmarker algorithm to obtain normalized 3D coordinates of key skeletal points. The skeletal movements are normalized, truncated for consistency, and converted into feature vectors. These vectors are then clustered and used to train various models to determine their performance in emotion recognition.
 
 ## Progress
 |Task|Status|
@@ -13,13 +13,7 @@ Abstract
 |Augment the data by rotating and flipping the pictures|✅|
 |"Cut" overrepresented classes, so the number of samples will be equal|✅|
 |Switch to PoseLandmarker and compute 3D vectors (instead of 2D) with estimated depths|✅|
-|Add demographics data to the feature vectors||
-|Apply simplification curve while calculating vector features, ensuring consistency in vector sizes||
 |Clean the code and add documentation||
-
-## Contents
-
-## Introduction
 
 ## Requirements
 Before running the project, install all necessary packages using <code>pip install -r requirements.txt</code>.
@@ -58,5 +52,3 @@ These pre-trained models were used:
 To see the demo, open and run the <code>posemotion.ipynb</code> file.
 
 ## Results
-
-## Acknowledgement

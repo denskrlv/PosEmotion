@@ -36,7 +36,7 @@ def draw(skeleton, labels=False, lines=True):
     return encoded_image_bytes
 
 
-def visualize(skeleton, ax=None):
+def visualize(skeleton, ax=None, text=False):
     if ax is None:
         fig = plt.figure(figsize=(10, 10))
         ax = fig.add_subplot(111, projection='3d')
@@ -50,7 +50,8 @@ def visualize(skeleton, ax=None):
     for key in transformed_joints:
         x, y, z = transformed_joints[key]
         ax.scatter(x, y, z, marker='o', s=20)
-        ax.text(x, y, z, key)  # Add label to each marker
+        if text:
+            ax.text(x, y, z, key)  # Add label to each marker
     
     connections = [
         ("nose", "left_eye"),

@@ -4,6 +4,7 @@ import numpy as np
 import os
 import pandas as pd
 
+from scipy.interpolate import UnivariateSpline
 from tools.structures import Skeleton, Segment
 
 
@@ -126,6 +127,22 @@ def normalize_skeleton(skeleton: Skeleton, box: tuple[float, float, float, float
             norm_skeleton.append([0, 0])
     
     return Skeleton(joints=norm_skeleton)
+
+
+def interpolate(df, columns, method="spline", order=3):
+    if method == "spline":
+        for column in columns:
+            valid_indices = df[column].notna()
+            x = np.arange(len(df)) 
+            if np.sum(valid_indices) > order:
+                spline = UnivariateSpline(x[valid_indices], df.loc[valid_indices, column], k=order, s=0)
+                df[column] = spline(x)
+            else:
+                print(f"Not enough data to interpolate {column} with spline of order {order}.")
+    else:
+        raise ValueError(f"Interpolation method {method} is not supported.")
+    
+    return df
 
 
 def _get_redundant_indices(start: int, end: int, segment_pivots: list[int]) -> list[int]:

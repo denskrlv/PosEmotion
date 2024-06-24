@@ -8,7 +8,7 @@ import tensorflow as tf
 import tensorflow_hub as hub
 
 from tqdm import tqdm
-from tools.structures import Skeleton
+from tools.structures import PLMSkeleton, Skeleton
 from ultralytics import YOLO
 
 
@@ -45,7 +45,7 @@ def _align_skeleton(skeleton: Skeleton) -> Skeleton:
     for key, point in joints.items():
         rotated_joints[key] = np.dot(R, point)
 
-    return Skeleton(joints=rotated_joints, image=skeleton.image)
+    return PLMSkeleton(joints=rotated_joints, image=skeleton.image)
 
 
 class YoloDetector:
@@ -142,16 +142,16 @@ class PoseLandmarkerDetector:
         keypoints = []
 
         mp_image = mp.Image.create_from_file(os.path.join(CORE_DIR, file_path))
-        indices = [0, 2, 5, 7, 8, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28]  # 17 keypoints indices
+        # indices = [0, 2, 5, 7, 8, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28]  # 17 keypoints indices
 
         with self.pose_landmarker.create_from_options(self.options) as landmarker:
             results = landmarker.detect(mp_image)
             
             if results.pose_landmarks == []:
-                return Skeleton(joints=_empty_keypoints(), image=file_path)
+                return PLMSkeleton(joints=_empty_keypoints(33), image=file_path)
 
             results = results.pose_landmarks[0]
-            results = [results[i] for i in indices]
+            # results = [results[i] for i in indices]
             for r in results:
                 if r.visibility >= conf:
                     keypoints.append([r.x, r.y, r.z]) if depth else keypoints.append([r.x, r.y, 0])
@@ -159,9 +159,9 @@ class PoseLandmarkerDetector:
                     keypoints.append([np.nan, np.nan, np.nan]) if depth else keypoints.append([np.nan, np.nan, 0])
 
         if align:
-            return _align_skeleton(Skeleton(joints=keypoints, image=file_path))
+            return _align_skeleton(PLMSkeleton(joints=keypoints, image=file_path))
         else:
-            return Skeleton(joints=keypoints, image=file_path)
+            return PLMSkeleton(joints=keypoints, image=file_path)
     
     def detect_multi(self, df, frames_path, conf=0.3, depth=True, align=False):
         keypoints = []
