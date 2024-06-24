@@ -13,12 +13,7 @@ The accurate interpretation of emotions is crucial in enhancing various fields, 
 |Augment the data by rotating and flipping the pictures|✅|
 |"Cut" overrepresented classes, so the number of samples will be equal|✅|
 |Switch to PoseLandmarker and compute 3D vectors (instead of 2D) with estimated depths|✅|
-<<<<<<< HEAD
 |Clean the code and add documentation||
-=======
-|Add quaternion interpolation to skeletons|🟡|
-|Clean the code and add documentation|🟡|
->>>>>>> 1706ef091b43fb0e030960a965701d7f58f1aace
 
 ## Requirements
 Before running the project, install all necessary packages using <code>pip install -r requirements.txt</code>.
