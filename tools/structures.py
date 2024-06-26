@@ -3,7 +3,6 @@
 import ast
 import numpy as np
 import pandas as pd
-from rdp import rdp
 
 
 def find_column_pairs(columns):
@@ -15,10 +14,6 @@ def find_column_pairs(columns):
                 pairs.append(pair_name)
 
     return pairs
-
-
-def _standardize(joint):
-    return joint if joint != [0, 0, 0] else [np.nan, np.nan, 0]
 
 
 class Segment:
@@ -99,86 +94,7 @@ class Segment:
         return angles
 
 
-# class Skeleton:
-
-#     def __init__(self, joints, image: str=None):
-#         if isinstance(joints, dict):
-#             self.joints = joints
-#         elif isinstance(joints, list):
-#             self.joints = self.to_dict(joints)
-#         else:
-#             raise TypeError("joints must be a list or a dictionary")
-#         self.image = image
-
-#     def __str__(self):
-#         return (
-#             "Joints:"
-#             f"\nImage: {self.image}"
-#             f"\nNose: {self.joints['nose']}"
-#             f"\nLeft Eye: {self.joints['left_eye']}"
-#             f"\nRight Eye: {self.joints['right_eye']}"
-#             f"\nLeft Ear: {self.joints['left_ear']}"
-#             f"\nRight Ear: {self.joints['right_ear']}"
-#             f"\nLeft Shoulder: {self.joints['left_shoulder']}"
-#             f"\nRight Shoulder: {self.joints['right_shoulder']}"
-#             f"\nLeft Elbow: {self.joints['left_elbow']}"
-#             f"\nRight Elbow: {self.joints['right_elbow']}"
-#             f"\nLeft Wrist: {self.joints['left_wrist']}"
-#             f"\nRight Wrist: {self.joints['right_wrist']}"
-#             f"\nLeft Hip: {self.joints['left_hip']}"
-#             f"\nRight Hip: {self.joints['right_hip']}"
-#             f"\nLeft Knee: {self.joints['left_knee']}"
-#             f"\nRight Knee: {self.joints['right_knee']}"
-#             f"\nLeft Ankle: {self.joints['left_ankle']}"
-#             f"\nRight Ankle: {self.joints['right_ankle']}"
-#         )
-    
-#     def __len__(self):
-#         return len(self.joints)
-    
-#     def to_dict(self, joints):
-#         return {
-#             "nose": _standardize(joints[0]),
-#             "left_eye": _standardize(joints[1]),
-#             "right_eye": _standardize(joints[2]),
-#             "left_ear": _standardize(joints[3]),
-#             "right_ear": _standardize(joints[4]),
-#             "left_shoulder": _standardize(joints[5]),
-#             "right_shoulder": _standardize(joints[6]),
-#             "left_elbow": _standardize(joints[7]),
-#             "right_elbow": _standardize(joints[8]),
-#             "left_wrist": _standardize(joints[9]),
-#             "right_wrist": _standardize(joints[10]),
-#             "left_hip": _standardize(joints[11]),
-#             "right_hip": _standardize(joints[12]),
-#             "left_knee": _standardize(joints[13]),
-#             "right_knee": _standardize(joints[14]),
-#             "left_ankle": _standardize(joints[15]),
-#             "right_ankle": _standardize(joints[16])
-#         }
-    
-#     def to_ndarray(self):
-#         joints_list = [
-#             self.joints["nose"], self.joints["left_eye"], self.joints["right_eye"],
-#             self.joints["left_ear"], self.joints["right_ear"], self.joints["left_shoulder"],
-#             self.joints["right_shoulder"], self.joints["left_elbow"], self.joints["right_elbow"],
-#             self.joints["left_wrist"], self.joints["right_wrist"], self.joints["left_hip"],
-#             self.joints["right_hip"], self.joints["left_knee"], self.joints["right_knee"],
-#             self.joints["left_ankle"], self.joints["right_ankle"]
-#         ]
-
-#         return np.array(joints_list)
-    
-#     def to_series(self):
-#         transformed_dict = {}
-#         for key, value in self.joints.items():
-#             transformed_dict[f"{key}_X"] = value[0]
-#             transformed_dict[f"{key}_Y"] = value[1]
-#             transformed_dict[f"{key}_Z"] = value[2]
-#         return pd.Series(transformed_dict)
-
-
-class PLMSkeleton:
+class Skeleton:
     def __init__(self, joints, image: str=None):
         if isinstance(joints, dict):
             self.joints = joints
@@ -205,6 +121,7 @@ class PLMSkeleton:
     
     def to_ndarray(self):
         joints_list = [self.joints[f"point_{i}"] for i in range(33)]
+
         return np.array(joints_list)
     
     def to_series(self):
@@ -213,5 +130,5 @@ class PLMSkeleton:
             transformed_dict[f"{key}_X"] = value[0]
             transformed_dict[f"{key}_Y"] = value[1]
             transformed_dict[f"{key}_Z"] = value[2]
-        return pd.Series(transformed_dict)
 
+        return pd.Series(transformed_dict)
