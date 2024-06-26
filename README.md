@@ -41,14 +41,17 @@ For this project EiLA (Latin-American) dataset was used. The data should have th
 ```
 
 ## Pre-trained Models
-These pre-trained models were used:
-|Model|Input size (pixels)|Keypoints|
-|:----|:-----------------:|:-------:|
-|[YOLOv8x-pose-p6](https://docs.ultralytics.com/tasks/pose/)|1280|17|
-|[PoseLandmarker](https://ai.google.dev/edge/api/mediapipe/java/com/google/mediapipe/tasks/vision/poselandmarker/PoseLandmarker)|256|32|
-|[MoveNet](https://www.tensorflow.org/hub/tutorials/movenet)|192|17|
+These pre-trained model was used:
+|Model|Input size (pixels)|Keypoints|Returns|
+|:----|:-----------------:|:-------:|:-----:|
+|[PoseLandmarker](https://ai.google.dev/edge/api/mediapipe/java/com/google/mediapipe/tasks/vision/poselandmarker/PoseLandmarker)|256|33|Normalized $(x,y,z)$ coordinates
 
 ## Demo
 To see the demo, open and run the <code>posemotion.ipynb</code> file.
 
 ## Results
+| **Model**         | **Accuracy (Mean)**       | **F1-Score (Mean)**      |
+|:-----------------:|:-------------------------:|:------------------------:|
+| SVM               | _0.5623 $\pm$ 0.0448_     | _0.4706 $\pm$ 0.0536_    |
+| Random Forest     | 0.5438                    | 0.4357                   |
+| Neural Network    | 0.4834                    | 0.4692                   |
