@@ -5,7 +5,7 @@ import os
 import pandas as pd
 
 from scipy.interpolate import UnivariateSpline
-from tools.structures import Skeleton, Segment
+from tools.structures import Segment
 
 
 CORE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -90,43 +90,6 @@ def normalize_segment(segment: Segment, target_size: int=10) -> Segment:
             rows_inserted += 1
     
     return Segment(df)
-
-
-def normalize_skeleton(skeleton: Skeleton, box: tuple[float, float, float, float]) -> Skeleton:
-    """
-    This function normalizes the keypoints based on the bounding box.
-
-    Args:
-        keypoints (Keypoints): The input Keypoints object which contains the keypoints to be normalized.
-        box (tuple): A tuple containing the x, y coordinates and the width and height of the bounding box.
-
-    Returns:
-        Keypoints: A new Keypoints object with the normalized keypoints.
-
-    The function first extracts the x, y coordinates and the width and height from the bounding box. 
-    Then it converts the keypoints to a list and initializes an empty list for the normalized keypoints.
-
-    It then iterates over the keypoints. For each keypoint, if both coordinates are not None, it subtracts the x, y coordinates 
-    of the bounding box from the keypoint coordinates and divides the result by the width and height of the bounding box, respectively. 
-    The normalized keypoint is then added to the list of normalized keypoints. If either coordinate of the keypoint is None, 
-    a keypoint of (0, 0) is added to the list of normalized keypoints.
-
-    Finally, it returns a new Keypoints object with the normalized keypoints and the same image as the input keypoints.
-    """
-    x, y, w, h = box
-    joints = skeleton.joints
-    norm_skeleton = []
-
-    for _, value in joints.items():
-        if value != [np.nan, np.nan]:
-            value = np.array(value)
-            value[0] = (value[0] - x) / w
-            value[1] = (value[1] - y) / h
-            norm_skeleton.append([value[0], value[1]])
-        else:
-            norm_skeleton.append([0, 0])
-    
-    return Skeleton(joints=norm_skeleton)
 
 
 def interpolate(df, columns, method="spline", order=3):
