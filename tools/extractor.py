@@ -26,7 +26,6 @@ class Extractor:
         extract_to (str): The directory to save the extracted frames to.
     
     """
-
     def __init__(self, annotations: str, extract_from: str, extract_to: str) -> None:
         self.annotations = os.path.join(CORE_DIR, annotations)
         self.extract_from = os.path.join(CORE_DIR, extract_from)

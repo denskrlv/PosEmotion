@@ -81,7 +81,6 @@ class PoseLandmarkerDetector:
         options: The options for the pose landmarker task.
 
     """
-
     def __init__(self, model_path: str) -> None:
         self.model_path = os.path.join(CORE_DIR, model_path)
         self.base_options = mp.tasks.BaseOptions

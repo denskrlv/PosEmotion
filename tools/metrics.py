@@ -13,20 +13,14 @@ CORE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 def segment(df: pd.DataFrame) -> list[Segment]:
     """
-    This function segments the input DataFrame into different segments based on changes in 'Video Tag', 'Clip Id', and 'Person Id'.
+    Segments the given DataFrame based on changes in the 'Video Tag', 'Clip Id', and 'Person Id' columns.
 
     Args:
-        df (pandas.DataFrame): The input DataFrame which contains the columns 'Video Tag', 'Clip Id', 'Person Id' 
-        and possibly 'X', 'Y', 'Width', 'Height'.
+        df (pd.DataFrame): The DataFrame to be segmented.
 
     Returns:
-        list: A list of Segment objects. Each Segment object represents a segment of the input DataFrame where 
-        'Video Tag', 'Clip Id', and 'Person Id' are constant.
+        list[Segment]: A list of Segment objects representing the segmented portions of the DataFrame.
 
-    The function first drops the columns 'X', 'Y', 'Width', 'Height' if they exist in the DataFrame. 
-    Then it iterates over the rows of the DataFrame. When it detects a change in 'Video Tag', 'Clip Id', or 'Person Id', 
-    it creates a new Segment with the rows up to that point and starts a new segment. 
-    After iterating over all rows, it creates a Segment with the remaining rows if any are left.
     """
     segments = []
     base = (None, None, None)
@@ -51,24 +45,15 @@ def segment(df: pd.DataFrame) -> list[Segment]:
 
 def normalize_segment(segment: Segment, target_size: int=10) -> Segment:
     """
-    This function normalizes the length of a segment to a target size by either removing or duplicating rows.
+    Normalize the given segment to the target size by either dropping redundant rows or duplicating rows.
 
     Args:
-        segment (Segment): The input Segment object which contains a DataFrame to be normalized.
-        target_size (int, optional): The target number of rows for the segment. Defaults to 10.
-        after (str, optional): The name of the column in the DataFrame after which empty keypoints are removed. Defaults to "Anger".
+        segment (Segment): The segment to be normalized.
+        target_size (int, optional): The desired size of the normalized segment. Defaults to 10.
 
     Returns:
-        Segment: A new Segment object with the normalized DataFrame.
+        Segment: The normalized segment.
 
-    The function first removes empty keypoints from the DataFrame and resets its index. Then it calculates the start and end indices 
-    of the DataFrame and the length of the DataFrame.
-
-    If the length of the DataFrame is greater than the target size, it calculates the indices of redundant rows and 
-    drops them from the DataFrame. If the length of the DataFrame is less than the target size, it calculates 
-    the indices of rows to be duplicated and inserts duplicates of these rows into the DataFrame.
-
-    Finally, it returns a new Segment with the normalized DataFrame.
     """
     df = segment.df.reset_index(drop=True)
     start, end = 0, len(df)-1
@@ -92,7 +77,23 @@ def normalize_segment(segment: Segment, target_size: int=10) -> Segment:
     return Segment(df)
 
 
-def interpolate(df, columns, method="spline", order=3):
+def interpolate(df: pd.DataFrame, columns: list, method: str="spline", order: int=3):
+    """
+    Interpolates missing values in the specified columns of a DataFrame using the specified method.
+
+    Args:
+        df (pd.DataFrame): The DataFrame containing the data to be interpolated.
+        columns (list): A list of column names to interpolate.
+        method (str, optional): The interpolation method to use. Defaults to "spline".
+        order (int, optional): The order of the spline interpolation. Only applicable if method is "spline". Defaults to 3.
+
+    Returns:
+        pd.DataFrame: The DataFrame with missing values interpolated.
+
+    Raises:
+        ValueError: If the specified interpolation method is not supported.
+
+    """
     if method == "spline":
         for column in columns:
             valid_indices = df[column].notna()
@@ -110,31 +111,34 @@ def interpolate(df, columns, method="spline", order=3):
 
 def _get_redundant_indices(start: int, end: int, segment_pivots: list[int]) -> list[int]:
     """
-    Returns a list of redundant indices within the given range.
+    Only for internal use. Get the redundant indices between the given start and end range, excluding the segment pivots.
 
     Args:
-        start (int): The starting index of the range.
-        end (int): The ending index of the range.
-        segment_pivots (list): A list of indices that are considered as pivots.
+        start (int): The start index of the range.
+        end (int): The end index of the range.
+        segment_pivots (list[int]): The list of segment pivots.
 
     Returns:
-        list: A list of redundant indices within the given range.
+        list[int]: The list of redundant indices.
+
     """
     segment_indices = set(range(start, end+1))
     segment_pivots = set(segment_pivots)
     diff = segment_indices - segment_pivots
+    
     return list(diff)
 
 
 def _get_duplicate_indices(array: list[int]) -> list[int]:
     """
-    Returns a list of duplicate elements in the given array.
+    Only for internal use. Returns a list of indices of duplicate elements in the given array.
 
     Args:
-        array (list): The input array.
+        array (list[int]): The input array.
 
     Returns:
-        list: A list of duplicate elements in the array.
+        list[int]: A list of indices of duplicate elements in the array.
+
     """
     duplicates = set()
     result = []
@@ -143,4 +147,5 @@ def _get_duplicate_indices(array: list[int]) -> list[int]:
             result.append(elem)
         else:
             duplicates.add(elem)
+
     return result
