@@ -62,14 +62,14 @@ class Extractor:
             frame = cv2.flip(frame, axis)
             cv2.imwrite(os.path.join(target, os.path.basename(file_path)), frame)
 
-    def random_rotate_frames(self, target: str, minr: int=30, maxr: int=330) -> None:
+    def random_rotate_frames(self, target: str, minr: int=0, maxr: int=360) -> None:
         """
         Randomly rotate frames within a specified range and save them to the target directory.
 
         Args:
             target (str): The directory to save the rotated frames to.
-            minr (int, optional): The minimum rotation angle in degrees (default: 30).
-            maxr (int, optional): The maximum rotation angle in degrees (default: 330).
+            minr (int, optional): The minimum rotation angle in degrees (default: 0).
+            maxr (int, optional): The maximum rotation angle in degrees (default: 360).
 
         Raises:
             Exception: If the extracted frames directory does not exist.

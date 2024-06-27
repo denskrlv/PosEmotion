@@ -129,16 +129,14 @@ class Segment:
     
     def vector_dist(self, pair: str) -> dict:
         """
-        Calculate the distances between the coordinates of a given pair and all other pairs.
+        Calculate the vector distances between the given pair and all other pairs in the dataframe.
 
         Args:
-            pair (str): The name of the pair for which distances need to be calculated.
+            pair (str): The pair for which to calculate the vector distances.
 
         Returns:
-            dict: A dictionary containing the distances between the coordinates of the given pair and all other pairs.
-                  The keys of the dictionary are in the format 'd_pair_other_pair_i', where 'pair' is the given pair,
-                  'other_pair' is the name of another pair, and 'i' is the index of the coordinate.
-
+            dict: A dictionary containing the calculated vector distances, with keys in the format 'd_{pair}_{other_pair}_fft'.
+        
         """
         distances = {}
         coordinates = self.df[[f"{pair}_X", f"{pair}_Y", f"{pair}_Z"]].values
@@ -148,7 +146,10 @@ class Segment:
         for other_pair in other_pairs:
             other_coordinates = self.df[[f"{other_pair}_X", f"{other_pair}_Y", f"{other_pair}_Z"]].values
             for i in range(len(coordinates)):
-                distances[f"d_{pair}_{other_pair}_{i}"] = np.linalg.norm(coordinates[i] - other_coordinates[i])
+                pair_dist = []
+                pair_dist.append(np.linalg.norm(coordinates[i] - other_coordinates[i]))
+            fft_result = np.real(np.fft.fft(pair_dist)[0])
+            distances[f"d_{pair}_{other_pair}_fft"] = fft_result
 
         return distances
 
