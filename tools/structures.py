@@ -122,23 +122,23 @@ class Segment:
         }
 
         for pair in pairs:
-            distances = self.vector_dist(pair)
-            vectors.update(distances)
+            features = self.vector_features(pair)
+            vectors.update(features)
         
         return vectors
     
-    def vector_dist(self, pair: str) -> dict:
+    def vector_features(self, pair: str) -> dict:
         """
-        Calculate the vector distances between the given pair and all other pairs in the dataframe.
+        Calculate vector features for a given pair.
 
         Args:
-            pair (str): The pair for which to calculate the vector distances.
+            pair (str): The pair for which to calculate vector features.
 
         Returns:
-            dict: A dictionary containing the calculated vector distances, with keys in the format 'd_{pair}_{other_pair}_fft'.
-        
+            dict: A dictionary containing the calculated vector features.
+            
         """
-        distances = {}
+        features = {}
         coordinates = self.df[[f"{pair}_X", f"{pair}_Y", f"{pair}_Z"]].values
         other_pairs = _find_column_pairs(self.get_column_names())
         other_pairs.remove(pair)
@@ -149,9 +149,10 @@ class Segment:
                 pair_dist = []
                 pair_dist.append(np.linalg.norm(coordinates[i] - other_coordinates[i]))
             fft_result = np.real(np.fft.fft(pair_dist)[0])
-            distances[f"d_{pair}_{other_pair}_fft"] = fft_result
+            features[f"d_{pair}_{other_pair}_fft"] = fft_result
+            features[f"d_{pair}_{other_pair}_std"] = np.std(pair_dist)
 
-        return distances
+        return features
 
 
 class Skeleton:
