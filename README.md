@@ -13,7 +13,7 @@ The accurate interpretation of emotions is crucial in enhancing various fields, 
 |Augment the data by rotating and flipping the pictures|✅|
 |"Cut" overrepresented classes, so the number of samples will be equal|✅|
 |Switch to PoseLandmarker and compute 3D vectors (instead of 2D) with estimated depths|✅|
-|Clean the code and add documentation||
+|Clean the code and add documentation|✅|
 
 ## Requirements
 Before running the project, install all necessary packages using <code>pip install -r requirements.txt</code>.
@@ -40,8 +40,7 @@ For this project EiLA (Latin-American) dataset was used. The data should have th
 │......
 ```
 
-## Pre-trained Models
-These pre-trained model was used:
+## Pre-trained Model
 |Model|Input size (pixels)|Keypoints|Returns|
 |:----|:-----------------:|:-------:|:-----:|
 |[PoseLandmarker (Full)](https://ai.google.dev/edge/api/mediapipe/java/com/google/mediapipe/tasks/vision/poselandmarker/PoseLandmarker)|256|33|Normalized $(x,y,z)$ coordinates
@@ -50,8 +49,23 @@ These pre-trained model was used:
 To see the demo, open and run the <code>posemotion.ipynb</code> file.
 
 ## Results
-| **Model**         | **Accuracy (Mean)**       | **F1-Score (Mean)**      |
-|:-----------------:|:-------------------------:|:------------------------:|
-| SVM               | _0.5623 $\pm$ 0.0448_     | _0.4706 $\pm$ 0.0536_    |
-| Random Forest     | 0.5438                    | 0.4357                   |
-| Neural Network    | 0.4834                    | 0.4692                   |
+### Clustering
+| **Clusters** | **Metric** | **Linkage** | **Silhouette** | **Davies-Bouldin** |
+|--------------|------------|-------------|----------------|--------------------|
+| 7            | euclidean  | ward        | 0.1507         | 1.5080             |
+| 5            | euclidean  | ward        | _0.1663_       | _1.4382_           |
+| 3            | euclidean  | ward        | 0.1603         | 1.5024             |
+| 7            | euclidean  | average     | _0.5648_       | _0.5397_           |
+| 5            | euclidean  | average     | 0.6225         | 0.6528             |
+| 3            | euclidean  | average     | 0.7240         | 0.1723             |
+| 7            | euclidean  | complete    | _0.5137_       | _0.9460_           |
+| 5            | euclidean  | complete    | 0.5270         | 0.9960             |
+| 3            | euclidean  | complete    | _0.7309_       | _0.8466_           |
+
+
+### Classification
+| **Model**        | **Accuracy (Mean)**         | **F1-Score (Mean)**        |
+|------------------|-----------------------------|----------------------------|
+| SVM              | _0.5816 ± 0.0310_           | _0.4672 ± 0.04476_         |
+| Random Forest    | 0.5539 ± 0.0563             | 0.5114 ± 0.0608            |
+| Neural Network   | 0.5055 ± 0.0670             | 0.4174 ± 0.0300            |

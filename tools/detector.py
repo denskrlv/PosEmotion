@@ -1,8 +1,8 @@
 # !/usr/bin/env python3
 
-import os
 import mediapipe as mp
 import numpy as np
+import os
 import pandas as pd
 
 from tqdm import tqdm

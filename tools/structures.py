@@ -129,7 +129,7 @@ class Segment:
     
     def vector_features(self, pair: str) -> dict:
         """
-        Calculate vector features for a given pair.
+        Calculate vector features between the given pair and all other pairs in the dataframe.
 
         Args:
             pair (str): The pair for which to calculate vector features.
@@ -146,11 +146,7 @@ class Segment:
         for other_pair in other_pairs:
             other_coordinates = self.df[[f"{other_pair}_X", f"{other_pair}_Y", f"{other_pair}_Z"]].values
             for i in range(len(coordinates)):
-                pair_dist = []
-                pair_dist.append(np.linalg.norm(coordinates[i] - other_coordinates[i]))
-            fft_result = np.real(np.fft.fft(pair_dist)[0])
-            features[f"d_{pair}_{other_pair}_fft"] = fft_result
-            features[f"d_{pair}_{other_pair}_std"] = np.std(pair_dist)
+                features[f"d_{pair}_{other_pair}_{i}"] = np.linalg.norm(coordinates[i] - other_coordinates[i])
 
         return features
 
@@ -239,3 +235,27 @@ class Skeleton:
             transformed_dict[f"{key}_Z"] = value[2]
 
         return pd.Series(transformed_dict)
+    
+    @classmethod
+    def from_series(cls, series: pd.Series) -> 'Skeleton':
+        """
+        Creates a Skeleton object from a pandas Series.
+
+        Args:
+            series (pd.Series): A Series containing joint coordinates.
+
+        Returns:
+            Skeleton: A Skeleton object created from the Series.
+
+        """
+        joints = {}
+        for key, value in series.items():
+            key_parts = key.split('_')
+            joint_name = '_'.join(key_parts[:-1])
+            if joint_name not in joints:
+                joints[joint_name] = [np.nan, np.nan, np.nan]
+            joints[joint_name][0] = series[f"{joint_name}_X"]
+            joints[joint_name][1] = series[f"{joint_name}_Y"]
+            joints[joint_name][2] = series[f"{joint_name}_Z"]
+
+        return cls(joints)
