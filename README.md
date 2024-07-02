@@ -66,6 +66,6 @@ To see the demo, open and run the <code>posemotion.ipynb</code> file.
 ### Classification
 | **Model**        | **Accuracy (Mean)**         | **F1-Score (Mean)**        |
 |------------------|-----------------------------|----------------------------|
-| SVM              | _0.5816 ± 0.0310_           | _0.4672 ± 0.04476_         |
+| SVM              | _0.5816 ± 0.0310_           | _0.4672 ± 0.0448_         |
 | Random Forest    | 0.5539 ± 0.0563             | 0.5114 ± 0.0608            |
-| Neural Network   | 0.5055 ± 0.0670             | 0.4174 ± 0.0300            |
+| Neural Network   | 0.4916 ± 0.0758             | 0.4174 ± 0.0300            |
