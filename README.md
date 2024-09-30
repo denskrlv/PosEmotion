@@ -43,7 +43,7 @@ For this project EiLA (Latin-American) dataset was used. The data should have th
 ## Pre-trained Model
 |Model|Input size (pixels)|Keypoints|Returns|
 |:----|:-----------------:|:-------:|:-----:|
-|[PoseLandmarker (Full)](https://ai.google.dev/edge/api/mediapipe/java/com/google/mediapipe/tasks/vision/poselandmarker/PoseLandmarker)|256|33|Normalized $(x,y,z)$ coordinates
+|[PoseLandmarker (Full)](https://ai.google.dev/edge/api/mediapipe/java/com/google/mediapipe/tasks/vision/poselandmarker/PoseLandmarker)|256|33|Normalized 3D coordinates
 
 ## Demo
 To see the demo, open and run the <code>posemotion.ipynb</code> file.
